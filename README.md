@@ -1,5 +1,5 @@
 # wetoken
-微信token服务，统一管理微信token，jsticket，过期后自动从官网获取，保存到数据库，并对外提供获取、刷新接口。
+公众号token服务，统一管理公众号的token，jsticket，过期后自动从官网获取，保存到数据库，并对外提供获取、刷新接口。
 
 
 √ 　支持独立部署
@@ -22,7 +22,7 @@
 ## 一、独立服务
 
 
-多个系统共用一个微信号，可使用wtserver，集中维护token，jstikcet。根据向导即可安装数据表结构，启动后即可对外提供服务。
+多个系统共用一个公众号，可使用wtserver，集中维护token，jstikcet。根据向导即可安装数据表结构，启动后即可对外提供服务。
 
 
 编译安装
@@ -49,7 +49,7 @@ wtserver start -r zk://192.168.106.18 -c t
 
 
 ## 二、代码集成
-公众号token，jstiket只有一个系统使用，为减少子系统维护可直接通过代码集成到现有系统中。
+只有一个系统使用公众号，为减少子系统维护，可直接通过代码集成到现有系统中。
 
 
 ## 1、创建任务表:
@@ -95,14 +95,14 @@ app.Initializing(func(c component.IContainer) error {
 }
 ```
 
-> 当`app.IsDebug==true`时会自动绑定公众号创建服务
+> 当`app.IsDebug==true`时会自动绑定公众号添加服务，可通过接口添加公众号
 
 获取token
 
 ```go
 
 tk:=token.NewToken(container， appid)
-token，err:=tk.Get()//不存在或已过期会自动从官网获取
+token，err:=tk.Get()//不存在或已过期，自动从官网获取
 
 ```
 
@@ -111,7 +111,7 @@ token，err:=tk.Get()//不存在或已过期会自动从官网获取
 ```go
 
 tk:=token.NewTicket(container， appid)
-ticket，err:=tk.Get()//不存在或已过期会自动从官网获取
+ticket，err:=tk.Get()//不存在或已过期，自动从官网获取
 
 ```
 
@@ -148,7 +148,7 @@ func main(){
 ## 四、其它
 
 
-##### 添加微信基础信息
+##### 添加公众号
 
 ```sh
 ~/work/bin$ curl "http://192.168.5.71:9999/wechat/app/create?appid=wx9e02ddcc34513fd4&secret=6acb2b999177524beba3d97d54df2de5&token=oTSvVuXdjx1FPi6bz"
