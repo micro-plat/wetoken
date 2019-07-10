@@ -95,6 +95,8 @@ app.Initializing(func(c component.IContainer) error {
 }
 ```
 
+
+
 > 当`app.IsDebug==true`时会自动绑定公众号添加服务，可通过接口添加公众号
 
 获取token
@@ -146,6 +148,19 @@ func main(){
 
 
 ## 四、其它
+
+
+##### 服务列表
+
+|             服务名             | 类型  | wetoken.Bind | wetoken.Cron | 说明               |
+| :----------------------------: | :---: | :----------: | :----------: | :----------------- |
+|       /wechat/app/create       |  api  |      √       |      √       | 添加公众号信息     |
+|   /[appid]/wechat/token/get    |  api  |      √       |      ×       | 获取最新token      |
+|   /[appid]/wechat/ticket/get   |  api  |      √       |      ×       | 获取最新ticket     |
+| /[appid]/wechat/token/refresh  | cron  |      √       |      √       | 定时刷新token任务  |
+| /[appid]/wechat/ticket/refresh | cron  |      √       |      √       | 定时刷新ticket任务 |
+
+
 
 
 ##### 添加公众号
