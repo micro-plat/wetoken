@@ -150,11 +150,11 @@ func main(){
 
 ##### 服务列表
 
-|             服务名             | 类型  | wetoken.Bind | wetoken.Cron | 说明               |
-| :----------------------------: | :---: | :----------: | :----------: | :----------------- |
-|       /wechat/app/create       |  api  |     可选     |     可选     | 添加公众号信息     |
-|   /[appid]/wechat/token/get    |  api  |      √       |      ×       | 获取最新token      |
-|   /[appid]/wechat/ticket/get   |  api  |      √       |      ×       | 获取最新ticket     |
+| 服务名                         | 类型  | wetoken.Bind | wetoken.Cron | 说明               |
+| :----------------------------- | :---: | :----------: | :----------: | :----------------- |
+| /wechat/app/create             |  api  |     可选     |     可选     | 添加公众号信息     |
+| /[appid]/wechat/token/get      |  api  |      √       |      ×       | 获取最新token      |
+| /[appid]/wechat/ticket/get     |  api  |      √       |      ×       | 获取最新ticket     |
 | /[appid]/wechat/token/refresh  | cron  |      √       |      √       | 定时刷新token任务  |
 | /[appid]/wechat/ticket/refresh | cron  |      √       |      √       | 定时刷新ticket任务 |
 
