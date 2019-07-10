@@ -116,8 +116,6 @@ tk:=token.NewTicket(container， appid)
 ticket，err:=tk.Get()//不存在或已过期，自动从官网获取
 
 ```
-
-
 ## 三、微信 sdk 中使用 token
 
 ```go

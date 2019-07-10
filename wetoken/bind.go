@@ -20,6 +20,7 @@ func Bind(app *hydra.MicroApp, bindAddApp bool, appids ...string) error {
 
 		app.Flow(fmt.Sprintf("/%s/wechat/token/refresh", appid), token.NewRefreshHandlerBy(appid))   //自动流程，定时刷新access token
 		app.Flow(fmt.Sprintf("/%s/wechat/ticket/refresh", appid), ticket.NewRefreshHandlerBy(appid)) //自动流程，定时刷新jsapi ticket
+
 		crons <- &conf.Task{Cron: "@every 1m", Service: fmt.Sprintf("/%s/wechat/token/refresh", appid)}
 		crons <- &conf.Task{Cron: "@every 1m", Service: fmt.Sprintf("/%s/wechat/ticket/refresh", appid)}
 
