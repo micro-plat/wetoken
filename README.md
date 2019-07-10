@@ -85,13 +85,13 @@ wtserver start -r zk://192.168.106.18 -c t
 
 ```go
 app.Initializing(func(c component.IContainer) error {
-    wetoken.Bind(app，"wx9e02ddcc34513fd4")　//绑定公众号查询，刷新接口和自动刷新任务
+    wetoken.Bind(app，true,"wx9e02ddcc34513fd4")　//绑定公众号查询，刷新接口和自动刷新任务
 }
 
 或
 
 app.Initializing(func(c component.IContainer) error {
-    wetoken.Cron(app，"wx9e02ddcc34513fd4")　//只绑定自动刷新任务
+    wetoken.Cron(app，true,"wx9e02ddcc34513fd4")　//只绑定自动刷新任务
 }
 ```
 
@@ -152,7 +152,7 @@ func main(){
 
 |             服务名             | 类型  | wetoken.Bind | wetoken.Cron | 说明               |
 | :----------------------------: | :---: | :----------: | :----------: | :----------------- |
-|       /wechat/app/create       |  api  |      √       |      √       | 添加公众号信息     |
+|       /wechat/app/create       |  api  |     可选     |     可选     | 添加公众号信息     |
 |   /[appid]/wechat/token/get    |  api  |      √       |      ×       | 获取最新token      |
 |   /[appid]/wechat/ticket/get   |  api  |      √       |      ×       | 获取最新ticket     |
 | /[appid]/wechat/token/refresh  | cron  |      √       |      √       | 定时刷新token任务  |
