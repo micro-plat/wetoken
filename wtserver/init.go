@@ -8,10 +8,10 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/micro-plat/hydra/component"
-	"github.com/micro-plat/wetoken/services/wechat/app"
-	"github.com/micro-plat/wetoken/services/wechat/ticket"
-	"github.com/micro-plat/wetoken/services/wechat/token"
-	"github.com/micro-plat/wetoken/services/wechat/wxcode"
+	"github.com/micro-plat/wetoken/wtserver/services/wechat/app"
+	"github.com/micro-plat/wetoken/wtserver/services/wechat/ticket"
+	"github.com/micro-plat/wetoken/wtserver/services/wechat/token"
+	"github.com/micro-plat/wetoken/wtserver/services/wechat/wxcode"
 )
 
 //AppWXConf 应用程序配置
