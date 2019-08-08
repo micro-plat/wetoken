@@ -3,6 +3,7 @@
 package sql
 
 import "github.com/micro-plat/lib4go/db"
+import _ "github.com/zkfy/go-oci8"
 
 func CreateDB(xdb db.IDB) error {
 	return db.CreateDB(xdb, "src/github.com/micro-plat/wetoken/modules/const/sql/oracle")

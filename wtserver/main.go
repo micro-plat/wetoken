@@ -11,8 +11,7 @@ func main() {
 		hydra.NewApp(
 			hydra.WithPlatName("wetoken"),
 			hydra.WithSystemName("wtserver"),
-			hydra.WithServerTypes("api-cron"),
-			hydra.WithDebug()),
+			hydra.WithServerTypes("api-cron")),
 	}
 
 	app.init()

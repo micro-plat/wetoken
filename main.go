@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/asaskevich/govalidator"
-	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/micro-plat/hydra/conf"
 	_ "github.com/micro-plat/hydra/hydra"
 	"github.com/micro-plat/hydra/registry"
@@ -16,8 +16,6 @@ import (
 	"github.com/micro-plat/wetoken/modules/const/sql"
 	"github.com/micro-plat/zkcli/rgsts"
 	_ "github.com/urfave/cli"
-
-	_ "github.com/zkfy/go-oci8"
 )
 
 func main() {
