@@ -6,9 +6,9 @@ import (
 	"github.com/micro-plat/hydra/conf"
 
 	"github.com/micro-plat/hydra/hydra"
-	xapp "github.com/micro-plat/wetoken/services/wechat/app"
-	"github.com/micro-plat/wetoken/services/wechat/ticket"
-	"github.com/micro-plat/wetoken/services/wechat/token"
+	xapp "github.com/micro-plat/wetoken/wtserver/services/wechat/app"
+	"github.com/micro-plat/wetoken/wtserver/services/wechat/ticket"
+	"github.com/micro-plat/wetoken/wtserver/services/wechat/token"
 )
 
 //Bind 绑定公众号token,ticket对应的刷新，获取，消息推送接口等

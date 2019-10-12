@@ -74,5 +74,5 @@ func getDB(buff []byte) (ldb.IDB, error) {
 		dbConf.ConnString,
 		dbConf.MaxOpen,
 		dbConf.MaxIdle,
-		dbConf.LefeTime)
+		dbConf.LifeTime)
 }
