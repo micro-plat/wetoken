@@ -28,27 +28,19 @@ func install() {
 
 //公共配置
 func pubConf() {
-	// hydra.Conf.Vars().HTTP("http")
 	hydra.Conf.Vars().RLog("/log/save@logging")
 }
 
 //测试环境配置
 func devConf() {
-	appConf := &AppWXConf{WX: []WXConfig{WXConfig{
-		AppID: "wx5260e02d76f306ca",
-	}}}
-
-	hydra.Conf.API("9999").Sub("app", appConf)
-	hydra.Conf.CRON().Task(task.NewTask("@every 1m", "/wx5260e02d76f306ca/wechat/token/refresh"), task.NewTask("@every 1m", "/wx5260e02d76f306ca/wechat/ticket/refresh")).Sub("app", appConf)
+	hydra.Conf.API("9999")
+	hydra.Conf.CRON()
 	hydra.Conf.Vars().DB().Oracle("db", "wechat_v2", "123456", "orcl136", db.WithConnect(20, 10, 600))
 }
 
 //生产环境配置
 func prodConf() {
-	appConf := &AppWXConf{WX: []WXConfig{WXConfig{
-		AppID: "#appid",
-	}}}
-	hydra.Conf.API("9999").Sub("app", appConf)
-	hydra.Conf.CRON().Task(task.NewTask("@every 1m", "/###appid/wechat/token/refresh"), task.NewTask("@every 1m", "/###appid/wechat/ticket/refresh")).Sub("app", appConf)
+	hydra.Conf.API("9999")
+	hydra.Conf.CRON()
 	hydra.Conf.Vars().DB().OracleByConnStr("db", "###oracle_db_string", db.WithConnect(20, 10, 600))
 }

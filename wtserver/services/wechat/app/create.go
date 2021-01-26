@@ -10,14 +10,6 @@ type CreateHandler struct {
 	app app.IWechatApp
 }
 
-func NewCreateHandlerBy() func() (u *CreateHandler) {
-	return func() (u *CreateHandler) {
-		return &CreateHandler{
-			app: app.NewWechatApp(),
-		}
-	}
-}
-
 //NewCreateHandler 创建服务
 func NewCreateHandler() (u *CreateHandler) {
 	return &CreateHandler{}

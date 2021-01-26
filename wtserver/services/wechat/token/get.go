@@ -1,35 +1,33 @@
 package token
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/micro-plat/hydra"
+	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/wetoken/modules/wechat/token"
 )
 
-type GetHandler struct {
-	appid string
-	token token.IToken
-}
+type GetTokenHandler struct{}
 
-func NewGetHandlerBy(appid string) func() (u *GetHandler) {
-	return func() (u *GetHandler) {
-		return &GetHandler{
-			appid: appid,
-			token: token.NewToken(appid),
-		}
-	}
+//NewGetTokenHandler 创建服务
+func NewGetTokenHandler() (u *GetTokenHandler) {
+	return &GetTokenHandler{}
 }
-
-//NewGetHandler 创建服务
-func NewGetHandler() (u *GetHandler) {
-	return &GetHandler{}
-}
-func (u *GetHandler) Query(ctx hydra.IContext) (r interface{}) {
+func (u *GetTokenHandler) Query(ctx hydra.IContext) (r interface{}) {
 	var result struct {
 		ErrCode int64  `json:"errcode"`
 		ErrMsg  string `json:"errmsg"`
 		token.AccessToken
 	}
-	token, err := u.token.Query()
+
+	appid := ctx.Request().Path().Params().GetString("appid")
+	if appid == "" {
+		return errs.NewError(http.StatusNotAcceptable, fmt.Errorf("参数appid错误,%s", appid))
+	}
+	tokenObj := token.NewToken(appid)
+	tokenInfo, err := tokenObj.Query()
 	if err != nil {
 		result.ErrCode = 400
 		result.ErrMsg = err.Error()
@@ -37,7 +35,7 @@ func (u *GetHandler) Query(ctx hydra.IContext) (r interface{}) {
 	}
 	result.ErrCode = 0
 	result.ErrMsg = "success"
-	result.AccessToken = *token
+	result.AccessToken = *tokenInfo
 	result.AccessToken.Reset()
 	return result
 }
@@ -46,13 +44,19 @@ func (u *GetHandler) Query(ctx hydra.IContext) (r interface{}) {
 //1. 从缓存中获取，不存在或过期时从数据库中获取
 //2. 从数据库中获取，不存在或过期时从微信官网获取
 //3. 从微信官网获取成功后，更新本地缓存和数据库
-func (u *GetHandler) Handle(ctx hydra.IContext) (r interface{}) {
+func (u *GetTokenHandler) Handle(ctx hydra.IContext) (r interface{}) {
 	var result struct {
 		ErrCode int64  `json:"errcode"`
 		ErrMsg  string `json:"errmsg"`
 		token.AccessToken
 	}
-	token, err := u.token.Get()
+
+	appid := ctx.Request().Path().Params().GetString("appid")
+	if appid == "" {
+		return errs.NewError(http.StatusNotAcceptable, fmt.Errorf("参数appid错误,%s", appid))
+	}
+	tokenObj := token.NewToken(appid)
+	tokenInfo, err := tokenObj.Get()
 	if err != nil {
 		result.ErrCode = 400
 		result.ErrMsg = err.Error()
@@ -60,7 +64,7 @@ func (u *GetHandler) Handle(ctx hydra.IContext) (r interface{}) {
 	}
 	result.ErrCode = 0
 	result.ErrMsg = "success"
-	result.AccessToken = *token
+	result.AccessToken = *tokenInfo
 	result.AccessToken.Reset()
 	return result
 }

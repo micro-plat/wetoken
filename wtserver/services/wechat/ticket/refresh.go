@@ -5,32 +5,22 @@ import (
 	"github.com/micro-plat/wetoken/modules/wechat/ticket"
 )
 
-//RefreshHandler token刷新操作
-type RefreshHandler struct {
-	appid  string
-	ticket ticket.ITicket
+//RefreshTicketHandler token刷新操作
+type RefreshTicketHandler struct {
 }
 
-//NewRefreshHandlerBy 根据appid创建定时刷新对象
-func NewRefreshHandlerBy(appid string) func() (u *RefreshHandler) {
-	return func() (u *RefreshHandler) {
-		return &RefreshHandler{
-			appid:  appid,
-			ticket: ticket.NewTicket(appid),
-		}
-	}
-}
-
-//NewRefreshHandler 创建服务
-func NewRefreshHandler() (u *RefreshHandler) {
-	return &RefreshHandler{}
+//NewRefreshTicketHandler 创建服务
+func NewRefreshTicketHandler() (u *RefreshTicketHandler) {
+	return &RefreshTicketHandler{}
 }
 
 //Handle 刷新jsapi ticket
 //1. 检查数据库jsapi ticket是否存在和过期
 //2. 不存在或过期，从微信官方获取后更新到本地缓存和数据库
-func (u *RefreshHandler) Handle(ctx hydra.IContext) (r interface{}) {
-	_, b, err := u.ticket.Refresh(false)
+func (u *RefreshTicketHandler) Handle(ctx hydra.IContext) (r interface{}) {
+
+	ticketObj := ticket.NewTicket("")
+	_, b, err := ticketObj.Refresh(false)
 	if err != nil {
 		return err
 	}
@@ -38,6 +28,6 @@ func (u *RefreshHandler) Handle(ctx hydra.IContext) (r interface{}) {
 		ctx.Response().Write(204)
 		return
 	}
-	ctx.Log().Infof("appid:%s jsapi ticket 刷新成功", u.appid)
+	ctx.Log().Infof("appid:%s jsapi ticket 刷新成功", "appid")
 	return nil
 }

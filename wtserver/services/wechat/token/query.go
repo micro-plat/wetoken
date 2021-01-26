@@ -1,35 +1,35 @@
 package token
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/micro-plat/hydra"
+	"github.com/micro-plat/lib4go/errs"
 	"github.com/micro-plat/wetoken/modules/wechat/token"
 )
 
-type QueryHandler struct {
+type QueryTokenHandler struct {
 	appid string
 	token token.IToken
 }
 
-func NewQueryHandlerBy(appid string) func() (u *QueryHandler) {
-	return func() (u *QueryHandler) {
-		return &QueryHandler{
-			appid: appid,
-			token: token.NewToken(appid),
-		}
-	}
+//NewQueryTokenHandler 创建服务
+func NewQueryTokenHandler() (u *QueryTokenHandler) {
+	return &QueryTokenHandler{}
 }
-
-//NewQueryHandler 创建服务
-func NewQueryHandler() (u *QueryHandler) {
-	return &QueryHandler{}
-}
-func (u *QueryHandler) Handle(ctx hydra.IContext) (r interface{}) {
+func (u *QueryTokenHandler) Handle(ctx hydra.IContext) (r interface{}) {
 	var result struct {
 		ErrCode int64  `json:"errcode"`
 		ErrMsg  string `json:"errmsg"`
 		token.AccessToken
 	}
-	token, err := u.token.Query()
+	appid := ctx.Request().Path().Params().GetString("appid")
+	if appid == "" {
+		return errs.NewError(http.StatusNotAcceptable, fmt.Errorf("参数appid错误,%s", appid))
+	}
+	tokenObj := token.NewToken(appid)
+	tokenInfo, err := tokenObj.Query()
 	if err != nil {
 		result.ErrCode = 400
 		result.ErrMsg = err.Error()
@@ -37,7 +37,7 @@ func (u *QueryHandler) Handle(ctx hydra.IContext) (r interface{}) {
 	}
 	result.ErrCode = 0
 	result.ErrMsg = "success"
-	result.AccessToken = *token
+	result.AccessToken = *tokenInfo
 	result.AccessToken.Reset()
 	return result
 }
