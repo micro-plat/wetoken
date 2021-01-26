@@ -2,6 +2,7 @@ package wetoken
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/micro-plat/hydra"
 	xapp "github.com/micro-plat/wetoken/wtserver/services/wechat/app"

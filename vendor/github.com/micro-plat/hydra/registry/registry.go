@@ -2,19 +2,32 @@ package registry
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"strings"
 
+	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/registry"
 )
 
-//IRegistry 注册中心接口,通过扩展支持zookeeper,consul,etcd
+//LocalMemory 本地内存模式
+const LocalMemory = "lm"
+
+//Zookeeper zk
+const Zookeeper = "zk"
+
+//FileSystem 本地文件系统
+const FileSystem = "fs"
+
+//Consul Consul
+const Consul = "consul"
+
+//Redis redis
+const Redis = "redis"
+
+//IRegistry 注册中心接口
 type IRegistry interface {
-	Exists(path string) (bool, error)
-	CanWirteDataInDir() bool
 	WatchChildren(path string) (data chan registry.ChildrenWatcher, err error)
 	WatchValue(path string) (data chan registry.ValueWatcher, err error)
 	GetChildren(path string) (paths []string, version int32, err error)
@@ -22,50 +35,86 @@ type IRegistry interface {
 	CreatePersistentNode(path string, data string) (err error)
 	CreateTempNode(path string, data string) (err error)
 	CreateSeqNode(path string, data string) (rpath string, err error)
-	Update(path string, data string, version int32) (err error)
+	Update(path string, data string) (err error)
 	Delete(path string) error
-	GetSeparator() string
+	Exists(path string) (bool, error)
 	Close() error
 }
 
-//GetRegistry 获取注册中心
-var registryMap cmap.ConcurrentMap
-
-func init() {
-	registryMap = cmap.New(2)
+//IFactory 注册中心构建器
+type IFactory interface {
+	Create(...Option) (IRegistry, error)
 }
 
-//RegistryResolver 定义配置文件转换方法
-type RegistryResolver interface {
-	Resolve(servers []string, u string, p string, log logger.ILogging) (IRegistry, error)
-}
+var registryMap = cmap.New(2)
+var registries = make(map[string]IFactory)
 
-var registryResolvers = make(map[string]RegistryResolver)
-
-//Register 注册配置文件适配器
-func Register(name string, resolver RegistryResolver) {
-	if resolver == nil {
+//Register 添加注册中心工厂对象
+func Register(name string, builder IFactory) {
+	if builder == nil {
 		panic("registry: Register adapter is nil")
 	}
-	if _, ok := registryResolvers[name]; ok {
+	if _, ok := registries[name]; ok {
 		panic("registry: Register called twice for adapter " + name)
 	}
-	registryResolvers[name] = resolver
+	registries[name] = builder
 }
 
-//newRegistry 创建注册中心
-func newRegistry(name string, servers []string, u string, p string, log logger.ILogging) (r IRegistry, err error) {
-	resolver, ok := registryResolvers[name]
-	if !ok {
-		return nil, fmt.Errorf("registry: unknown adapter name %q (forgotten import?)", name)
+//CreateRegistry 创建新的的注册中心
+func CreateRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
+	proto, addrs, u, p, mt, err := Parse(address)
+	if err != nil {
+		return nil, err
 	}
-	key := fmt.Sprintf("%s_%s", name, strings.Join(servers, "_"))
+	resolver, ok := registries[proto]
+	if !ok {
+		return nil, fmt.Errorf("不支持的协议类型[%s]", proto)
+	}
+	return resolver.Create(Addrs(addrs...),
+		WithAuthCreds(u, p),
+		WithLogger(log),
+		WithDomain(global.Def.PlatName), WithMetadata(mt))
+
+}
+
+//Support 检查注册中心地址是否支持
+func Support(address string) bool {
+	proto, _, _, _, _, err := Parse(address)
+	if err != nil {
+		return false
+	}
+	_, ok := registries[proto]
+	return ok
+}
+
+//GetCurrent 获取当前注册中心
+func GetCurrent() IRegistry {
+	r, _ := GetRegistry(global.Def.RegistryAddr, global.Def.Log())
+	return r
+}
+
+//GetRegistry 获取缓存的注册中心
+func GetRegistry(address string, log logger.ILogging) (r IRegistry, err error) {
+	proto, addrs, u, p, mt, err := Parse(address)
+	if err != nil {
+		return nil, err
+	}
+	resolver, ok := registries[proto]
+	if !ok {
+		return nil, fmt.Errorf("不支持的协议类型[%s]", proto)
+	}
+	key := fmt.Sprintf("%s_%s", proto, strings.Join(addrs, "_"))
 	_, value, err := registryMap.SetIfAbsentCb(key, func(input ...interface{}) (interface{}, error) {
-		rsvr := input[0].(RegistryResolver)
+		rsvr := input[0].(IFactory)
 		srvs := input[1].([]string)
 		log := input[2].(logger.ILogging)
-		return rsvr.Resolve(srvs, u, p, log)
-	}, resolver, servers, log)
+
+		return rsvr.Create(Addrs(srvs...),
+			WithAuthCreds(u, p),
+			WithLogger(log),
+			WithDomain(global.Def.PlatName), WithMetadata(mt))
+
+	}, resolver, addrs, log)
 	if err != nil {
 		return
 	}
@@ -73,54 +122,72 @@ func newRegistry(name string, servers []string, u string, p string, log logger.I
 	return
 }
 
-//NewRegistryWithAddress 根据协议地址创建注册中心
-func NewRegistryWithAddress(address string, log logger.ILogging) (r IRegistry, err error) {
-	proto, addrss, u, p, err := ResolveAddress(address)
-	if err != nil {
-		return nil, err
+//GetProto 获取协议名称
+func GetProto(addr string) string {
+	p, _, _, _, _, _ := Parse(addr)
+	return p
+}
+
+//GetAddrs 获取地址信息
+func GetAddrs(addr string) []string {
+	_, addrs, _, _, _, _ := Parse(addr)
+	return addrs
+}
+
+//Parse 解析地址
+//如:zk://192.168.0.155:2181 或 fs://../
+func Parse(address string) (proto string, raddr []string, u string, p string, mt map[string]string, err error) {
+	if strings.Count(address, "://") != 1 {
+		return "", nil, "", "", nil, fmt.Errorf("%s，包含多个://。格式:[proto]://[address]", address)
 	}
-	return newRegistry(proto, addrss, u, p, log)
-}
 
-//Close 关闭注册中心的服务
-func Close() {
-	registryMap.RemoveIterCb(func(key string, value interface{}) bool {
-		if v, ok := value.(IRegistry); ok {
-			v.Close()
-		}
-		return true
-	})
-}
-
-//ResolveAddress 解析地址
-//如:zk://192.168.0.155:2181
-//如:standalone://localhost
-func ResolveAddress(address string) (proto string, raddr []string, u string, p string, err error) {
 	addr := strings.SplitN(address, "://", 2)
 	if len(addr) != 2 {
-		return "", nil, "", "", fmt.Errorf("%s错误，必须包含://", address)
+		return "", nil, "", "", nil, fmt.Errorf("%s，必须包含://。格式:[proto]://[address]", address)
 	}
 	if len(addr[0]) == 0 {
-		return "", nil, "", "", fmt.Errorf("%s错误，协议名不能为空", address)
+		return "", nil, "", "", nil, fmt.Errorf("%s，协议名不能为空。格式:[proto]://[address]", address)
 	}
 	if len(addr[1]) == 0 {
-		return "", nil, "", "", fmt.Errorf("%s错误，地址不能为空", address)
+		return "", nil, "", "", nil, fmt.Errorf("%s，地址不能为空。格式:[proto]://[address]", address)
 	}
 	proto = addr[0]
 	raddr = strings.Split(addr[1], ",")
 	var addr0 string
-	u, p, addr0, err = getUPAddress(raddr[0])
+	u, p, addr0, err = getAddrByUserPass(raddr[0])
 	raddr[0] = addr0
 	return
 }
 
+//Format 格式化注册中心地址
+func Format(ele string) string {
+	return Join(ele)
+}
+
 //Join 地址连接
 func Join(elem ...string) string {
-	path := filepath.Join(elem...)
-	return strings.Replace(path, "\\", "/", -1)
-
+	var builder strings.Builder
+	builder.WriteString("/")
+	for _, v := range elem {
+		if v == "/" || v == "\\" || strings.TrimSpace(v) == "" {
+			continue
+		}
+		builder.WriteString(strings.Trim(v, "/"))
+		builder.WriteString("/")
+	}
+	return strings.TrimSuffix(builder.String(), "/")
 }
-func getUPAddress(addr string) (u string, p string, address string, err error) {
+
+//Split 将路径分隔为多段数组
+func Split(path string) []string {
+	return strings.Split(Trim(path), "/")
+}
+
+//Trim 去掉前后的""/"
+func Trim(l string) string {
+	return strings.Trim(l, "/")
+}
+func getAddrByUserPass(addr string) (u string, p string, address string, err error) {
 	if !strings.Contains(addr, "@") {
 		return "", "", addr, nil
 	}
@@ -138,4 +205,14 @@ func getUPAddress(addr string) (u string, p string, address string, err error) {
 	default:
 		return "", "", "", fmt.Errorf("地址非法%s", addrs[0])
 	}
+}
+
+//Close 关闭注册中心的服务
+func Close() {
+	registryMap.RemoveIterCb(func(key string, value interface{}) bool {
+		if v, ok := value.(IRegistry); ok {
+			v.Close()
+		}
+		return true
+	})
 }
