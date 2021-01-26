@@ -3,7 +3,6 @@ package message
 import (
 	"fmt"
 
-	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/wetoken/modules/wechat/app"
 	"github.com/micro-plat/wetoken/modules/wechat/token"
 	"github.com/micro-plat/wetoken/modules/wechat/users"
@@ -14,19 +13,17 @@ type IMessage interface {
 }
 
 type Message struct {
-	c     component.IContainer
 	app   app.IWechatApp
 	token token.IToken
 	user  users.IDBUser
 	appid string
 }
 
-func NewMessage(c component.IContainer, appid string) *Message {
+func NewMessage(appid string) *Message {
 	return &Message{
-		c:     c,
-		app:   app.NewWechatApp(c),
-		user:  users.NewDBUser(c),
-		token: token.NewToken(c, appid),
+		app:   app.NewWechatApp(),
+		user:  users.NewDBUser(),
+		token: token.NewToken(appid),
 		appid: appid,
 	}
 }

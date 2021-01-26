@@ -6,9 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro-plat/hydra/component"
+	"github.com/lib4dev/wechat/mp"
 	"github.com/micro-plat/lib4go/concurrent/cmap"
-	"github.com/micro-plat/wechat/mp"
 )
 
 var errTokenExpired = errors.New("access token has expired")
@@ -59,9 +58,9 @@ type Token struct {
 }
 
 //NewToken 构建access token统一访问对象
-func NewToken(c component.IContainer, appid string) *Token {
+func NewToken(appid string) *Token {
 	return &Token{
-		dbToken:    NewDBToken(c, appid),
+		dbToken:    NewDBToken(appid),
 		cacheToken: NewCacheToken(appid),
 		wxToken:    NewWechatToken(appid),
 		appid:      appid,

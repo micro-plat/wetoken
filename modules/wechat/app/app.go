@@ -2,9 +2,7 @@ package app
 
 import (
 	"fmt"
-
-	"github.com/micro-plat/hydra/component"
-	"github.com/micro-plat/lib4go/types"
+	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/wetoken/modules/const/sql"
 )
 
@@ -30,25 +28,23 @@ type IWechatApp interface {
 
 //WechatApp 微信信息
 type WechatApp struct {
-	c component.IContainer
 }
 
 //NewWechatApp 构建wechat app操作对象
-func NewWechatApp(c component.IContainer) *WechatApp {
-	return &WechatApp{
-		c: c,
-	}
+func NewWechatApp() *WechatApp {
+	return &WechatApp{}
 }
 
 //Get 根据appid获取当前微信app信息
 func (a *WechatApp) Get(appid string) (*WechatAppInfo, error) {
-	db := a.c.GetRegularDB()
-	data, _, _, err := db.Query(sql.QueryWechatApp, map[string]interface{}{"appid": appid})
+	db := hydra.C.DB().GetRegularDB()
+	data, err := db.Query(sql.QueryWechatApp, map[string]interface{}{"appid": appid})
 	if err != nil {
 		return nil, err
 	}
 	app := WechatAppInfo{}
-	if err = types.Map2Struct(data.Get(0), &app); err != nil {
+	res := data.Get(0)
+	if err = res.ToStruct(&app); err != nil {
 		return nil, err
 	}
 	return &app, nil
@@ -56,8 +52,8 @@ func (a *WechatApp) Get(appid string) (*WechatAppInfo, error) {
 
 //Save 保存微信基本信息
 func (a *WechatApp) Save(b AppBaseInfo) error {
-	db := a.c.GetRegularDB()
-	d, _, _, err := db.Query(sql.QueryWechatApp, map[string]interface{}{
+	db := hydra.C.DB().GetRegularDB()
+	d, err := db.Query(sql.QueryWechatApp, map[string]interface{}{
 		"appid": b.Appid,
 	})
 	if err != nil {
@@ -68,7 +64,7 @@ func (a *WechatApp) Save(b AppBaseInfo) error {
 		return err
 	}
 
-	_, _, _, err = db.Execute(sql.InsertWebchatApp,
+	_, err = db.Execute(sql.InsertWebchatApp,
 		map[string]interface{}{
 			"appid":     b.Appid,
 			"secret":    b.Secret,

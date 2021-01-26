@@ -1,8 +1,7 @@
 package users
 
 import (
-	"github.com/micro-plat/hydra/component"
-	"github.com/micro-plat/lib4go/types"
+	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/wetoken/modules/const/sql"
 )
 
@@ -11,19 +10,16 @@ type IDBUser interface {
 }
 
 type User struct {
-	c component.IContainer
 }
 
-func NewDBUser(c component.IContainer) *User {
-	return &User{
-		c: c,
-	}
+func NewDBUser() *User {
+	return &User{}
 }
 
 //Get 根据appid,用户名获取用户信息
 func (a *User) Get(appid string, userName string) (*WechatUserInfo, error) {
-	db := a.c.GetRegularDB()
-	data, _, _, err := db.Query(sql.QueryUserByName, map[string]interface{}{
+	db := hydra.C.DB().GetRegularDB()
+	data, err := db.Query(sql.QueryUserByName, map[string]interface{}{
 		"appid":     appid,
 		"user_name": userName,
 	})
@@ -31,7 +27,8 @@ func (a *User) Get(appid string, userName string) (*WechatUserInfo, error) {
 		return nil, err
 	}
 	u := WechatUserInfo{}
-	if err = types.Map2Struct(data.Get(0), &u); err != nil {
+	res := data.Get(0)
+	if err = res.ToStruct(&u); err != nil {
 		return nil, err
 	}
 	return &u, nil

@@ -1,15 +1,19 @@
 module github.com/micro-plat/wetoken
 
-go 1.12
+go 1.15
+
+replace github.com/micro-plat/hydra => ../../../github.com/micro-plat/hydra
+
+replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
+
+replace github.com/lib4dev/wechat => ../../../github.com/lib4dev/wechat
 
 require (
-	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
+	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/micro-plat/hydra v0.13.5
-	github.com/micro-plat/lib4go v0.4.1
+	github.com/lib4dev/wechat v0.0.0-00010101000000-000000000000
+	github.com/micro-plat/hydra v0.0.0-00010101000000-000000000000
+	github.com/micro-plat/lib4go v1.0.10
 	github.com/micro-plat/wechat v0.0.0-20190124071457-da29af712665
-	github.com/micro-plat/zkcli v0.0.0-20190522060924-e37c30ff0771
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/urfave/cli v1.22.1
-	github.com/zkfy/go-oci8 v0.0.0-20180327092318-ad9f59dedff0
 )

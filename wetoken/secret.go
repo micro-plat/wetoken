@@ -1,7 +1,6 @@
 package wetoken
 
 import (
-	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/wetoken/modules/wechat/app"
 )
 
@@ -13,8 +12,8 @@ type AppInfoResult struct {
 }
 
 // GetWxSecret 获取平台信息
-func GetWxSecret(container component.IContainer, appID string) (results *AppInfoResult, err error) {
-	appLib := app.NewWechatApp(container)
+func GetWxSecret(appID string) (results *AppInfoResult, err error) {
+	appLib := app.NewWechatApp()
 	appInfo, err := appLib.Get(appID)
 	result := &AppInfoResult{
 		ErrCode: 0,

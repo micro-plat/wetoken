@@ -1,7 +1,6 @@
 package wetoken
 
 import (
-	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/wetoken/modules/wechat/ticket"
 )
 
@@ -13,8 +12,8 @@ type TicketResult struct {
 }
 
 //GetWxTicket 获取Ticket
-func GetWxTicket(container component.IContainer, appID string) (results *TicketResult, err error) {
-	ticketLib := ticket.NewTicket(container, appID)
+func GetWxTicket(appID string) (results *TicketResult, err error) {
+	ticketLib := ticket.NewTicket(appID)
 	ticket, err := ticketLib.Get()
 	result := &TicketResult{
 		ErrCode: 0,

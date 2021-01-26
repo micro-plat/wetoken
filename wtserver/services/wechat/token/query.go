@@ -1,34 +1,29 @@
 package token
 
 import (
-	"github.com/micro-plat/hydra/component"
-	"github.com/micro-plat/hydra/context"
+	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/wetoken/modules/wechat/token"
 )
 
 type QueryHandler struct {
-	container component.IContainer
-	appid     string
-	token     token.IToken
+	appid string
+	token token.IToken
 }
 
-func NewQueryHandlerBy(appid string) func(container component.IContainer) (u *QueryHandler) {
-	return func(container component.IContainer) (u *QueryHandler) {
+func NewQueryHandlerBy(appid string) func() (u *QueryHandler) {
+	return func() (u *QueryHandler) {
 		return &QueryHandler{
-			container: container,
-			appid:     appid,
-			token:     token.NewToken(container, appid),
+			appid: appid,
+			token: token.NewToken(appid),
 		}
 	}
 }
 
 //NewQueryHandler 创建服务
-func NewQueryHandler(container component.IContainer) (u *QueryHandler) {
-	return &QueryHandler{
-		container: container,
-	}
+func NewQueryHandler() (u *QueryHandler) {
+	return &QueryHandler{}
 }
-func (u *QueryHandler) Handle(ctx *context.Context) (r interface{}) {
+func (u *QueryHandler) Handle(ctx hydra.IContext) (r interface{}) {
 	var result struct {
 		ErrCode int64  `json:"errcode"`
 		ErrMsg  string `json:"errmsg"`

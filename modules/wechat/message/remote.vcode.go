@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/micro-plat/wechat/mp"
+	"github.com/lib4dev/wechat/mp"
 
-	"github.com/micro-plat/wechat/mp/message/template"
+	"github.com/lib4dev/wechat/mp/message/template"
 )
 
 //wxSend 发送微信验证码

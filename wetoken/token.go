@@ -1,7 +1,6 @@
 package wetoken
 
 import (
-	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/wetoken/modules/wechat/token"
 )
 
@@ -13,8 +12,8 @@ type TokenResult struct {
 }
 
 //GetWxToken 获取token
-func GetWxToken(container component.IContainer, appID string) (results *TokenResult, err error) {
-	tokenLib := token.NewToken(container, appID)
+func GetWxToken(appID string) (results *TokenResult, err error) {
+	tokenLib := token.NewToken(appID)
 	token, err := tokenLib.Get()
 	result := &TokenResult{
 		ErrCode: 0,

@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro-plat/hydra/component"
 	"github.com/micro-plat/wetoken/modules/wechat/token"
 )
 
@@ -53,12 +52,12 @@ type Ticket struct {
 }
 
 //NewTicket 构建jsapi ticket统一访问对象
-func NewTicket(c component.IContainer, appid string) *Ticket {
+func NewTicket(appid string) *Ticket {
 	return &Ticket{
-		dbTicket:    NewDBTicket(c, appid),
+		dbTicket:    NewDBTicket(appid),
 		cacheTicket: NewCacheTicket(appid),
 		wxTicket:    NewWechatTicket(appid),
-		token:       token.NewToken(c, appid),
+		token:       token.NewToken(appid),
 	}
 }
 

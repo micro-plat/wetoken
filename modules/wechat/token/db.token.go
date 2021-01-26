@@ -4,28 +4,26 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/micro-plat/hydra/component"
+	"github.com/micro-plat/hydra"
 	"github.com/micro-plat/wetoken/modules/const/sql"
 )
 
 //DBToken 数据库access token
 type DBToken struct {
-	c     component.IContainer
 	appid string
 }
 
 //NewDBToken 构建数据库access token访问对象
-func NewDBToken(c component.IContainer, appid string) *DBToken {
+func NewDBToken(appid string) *DBToken {
 	return &DBToken{
-		c:     c,
 		appid: appid,
 	}
 }
 
 //Update 修改access token查询消息
 func (t *DBToken) Update(msg string) error {
-	db := t.c.GetRegularDB()
-	_, _, _, err := db.Execute(sql.UpdateAccessTokenMessage, map[string]interface{}{
+	db := hydra.C.DB().GetRegularDB()
+	_, err := db.Execute(sql.UpdateAccessTokenMessage, map[string]interface{}{
 		"appid":   t.appid,
 		"message": msg,
 	})
@@ -37,9 +35,9 @@ func (t *DBToken) Update(msg string) error {
 
 //Save 保存access token到db,不存在时创建
 func (t *DBToken) Save(tk *AccessToken) error {
-	db := t.c.GetRegularDB()
+	db := hydra.C.DB().GetRegularDB()
 	//更新access token
-	r, _, _, err := db.Execute(sql.UpdateAccessToken, map[string]interface{}{
+	r, err := db.Execute(sql.UpdateAccessToken, map[string]interface{}{
 		"appid":   t.appid,
 		"token":   tk.Token,
 		"expire":  tk.ExpiresIn,
@@ -52,7 +50,7 @@ func (t *DBToken) Save(tk *AccessToken) error {
 		return nil
 	}
 	//创建access token记录
-	_, _, _, err = db.Execute(sql.InsertAccessToken, map[string]interface{}{
+	_, err = db.Execute(sql.InsertAccessToken, map[string]interface{}{
 		"appid":   t.appid,
 		"token":   tk.Token,
 		"expire":  tk.ExpiresIn,
@@ -66,8 +64,8 @@ func (t *DBToken) Save(tk *AccessToken) error {
 
 //Query 从数据库获取access Token
 func (t *DBToken) Query() (token *AccessToken, err error) {
-	db := t.c.GetRegularDB()
-	data, _, _, err := db.Query(sql.QueryAccessToken, map[string]interface{}{"appid": t.appid})
+	db := hydra.C.DB().GetRegularDB()
+	data, err := db.Query(sql.QueryAccessToken, map[string]interface{}{"appid": t.appid})
 	if err != nil {
 		return nil, fmt.Errorf("从数据库中获取token失败:%s %v", t.appid, err)
 	}
@@ -90,8 +88,8 @@ func (t *DBToken) Query() (token *AccessToken, err error) {
 
 //Get 从数据库获取access Token
 func (t *DBToken) Get() (token *AccessToken, err error) {
-	db := t.c.GetRegularDB()
-	data, _, _, err := db.Query(sql.QueryAccessToken, map[string]interface{}{"appid": t.appid})
+	db := hydra.C.DB().GetRegularDB()
+	data, err := db.Query(sql.QueryAccessToken, map[string]interface{}{"appid": t.appid})
 	if err != nil {
 		return nil, fmt.Errorf("从数据库中获取token失败:%s %v", t.appid, err)
 	}
@@ -120,8 +118,8 @@ func (t *DBToken) Get() (token *AccessToken, err error) {
 
 //GetSecret 获取secret
 func (t *DBToken) GetSecret() (secret string, err error) {
-	db := t.c.GetRegularDB()
-	data, _, _, err := db.Query(sql.QueryWechatApp, map[string]interface{}{"appid": t.appid})
+	db := hydra.C.DB().GetRegularDB()
+	data, err := db.Query(sql.QueryWechatApp, map[string]interface{}{"appid": t.appid})
 	if err != nil {
 		return "", fmt.Errorf("从数据库中获取secret失败:%s %v", t.appid, err)
 	}
