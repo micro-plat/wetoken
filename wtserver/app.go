@@ -7,6 +7,7 @@ import (
 	xapp "github.com/micro-plat/hydra/conf/app"
 	"github.com/micro-plat/hydra/hydra/servers/cron"
 	"github.com/micro-plat/hydra/hydra/servers/http"
+	"github.com/micro-plat/wetoken/modules/const/sql"
 	"github.com/micro-plat/wetoken/wtserver/services/wechat/app"
 	"github.com/micro-plat/wetoken/wtserver/services/wechat/ticket"
 	"github.com/micro-plat/wetoken/wtserver/services/wechat/token"
@@ -22,6 +23,8 @@ var App = hydra.NewApp(
 func init() {
 
 	install()
+
+	sql.Install()
 
 	App.OnStarting(func(appConf xapp.IAPPConf) error {
 		_, err := hydra.C.DB().GetDB()

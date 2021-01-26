@@ -128,3 +128,24 @@ func (t *DBToken) GetSecret() (secret string, err error) {
 	}
 	return data.Get(0).GetString("secret"), nil
 }
+
+//GetList 从数据库获取access Token
+func GetList() (list []string, err error) {
+	db := hydra.C.DB().GetRegularDB()
+	datas, err := db.Query(sql.QueryAccessTokenList, nil)
+	if err != nil {
+		return nil, fmt.Errorf("从数据库中获取token appid 列表失败: %v", err)
+	}
+
+	list = make([]string, 0)
+	if datas.IsEmpty() {
+		return
+	}
+	for _, item := range datas {
+		appid := item.GetString("appid")
+		if appid != "" {
+			list = append(list, item.GetString("appid"))
+		}
+	}
+	return
+}

@@ -1,14 +1,6 @@
-// +build !oracle
 
-package sql
 
-import (
-	"github.com/micro-plat/hydra"
-)
-
-//seq_user_info_id
-func Install() {
-	hydra.Installer.DB.AddSQL(`CREATE TABLE  wechat_app_info (
+	CREATE TABLE  wechat_app_info (
 		appid VARCHAR(64)  not null  comment 'appid' ,
 		secret VARCHAR(32)  not null  comment 'secret' ,
 		token VARCHAR(32)  not null  comment 'token' ,
@@ -59,5 +51,4 @@ func Install() {
 		PRIMARY KEY (user_id),
 		UNIQUE KEY unq_wechat_user_info_appid (appid),
 		UNIQUE KEY unq_wechat_user_info_user_name (user_name)
-		) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='用户基本信息';`)
-}
+		) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='用户基本信息';

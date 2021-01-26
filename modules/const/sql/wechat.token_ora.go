@@ -1,10 +1,11 @@
-// +build oci
+// +build oracle
 
 package sql
 
 //----------------------access token---------------------------
 
 const QueryAccessToken = `select t.appid,t.access_token,t.expire,to_char(t.expire_date,'yyyy/mm/dd hh24:mi:ss') expire_date from wechat_access_token t where t.appid=@appid`
+const QueryAccessTokenList = `select t.appid from wechat_access_token t`
 const UpdateAccessToken = `update wechat_access_token t set 
 t.access_token=@token,t.expire=@expire,t.expire_date=sysdate+@expire/24/60/60,t.update_time=sysdate,t.message=@message
  where t.appid=@appid`

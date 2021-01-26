@@ -1,4 +1,4 @@
-// +build !oci
+// +build !oracle
 
 package sql
 

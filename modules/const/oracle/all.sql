@@ -1,13 +1,6 @@
-// +build oracle
 
-package sql
 
-import (
-	"github.com/micro-plat/hydra"
-)
-
-func Install() {
-	hydra.Installer.DB.AddSQL(`create table wechat_app_info(
+	create table wechat_app_info(
 		appid varchar2(64)  not null ,
 		secret varchar2(32)  not null ,
 		token varchar2(32)  not null ,
@@ -133,5 +126,5 @@ func Install() {
 	minvalue 1
 	maxvalue 99999999999
 	start with 1
-	cache 20;`)
-}
+	cache 20;
+	

@@ -19,15 +19,27 @@ func NewRefreshTokenHandler() (u *RefreshTokenHandler) {
 //2. 不存在或过期，从微信官方获取后更新到本地缓存和数据库
 func (u *RefreshTokenHandler) Handle(ctx hydra.IContext) (r interface{}) {
 
-	tokenObj := token.NewToken("")
-	_, b, err := tokenObj.Refresh(false)
+	appids, err := token.GetList()
 	if err != nil {
 		return err
 	}
-	if !b {
-		ctx.Response().Write(204)
+	if len(appids) <= 0 {
+		ctx.Log().Infof("没有需要刷新的ticket")
 		return
 	}
-	ctx.Log().Infof("appid:%s access token 刷新成功", "appid")
+
+	for _, appid := range appids {
+		tokenObj := token.NewToken(appid)
+		_, b, err := tokenObj.Refresh(false)
+		if err != nil {
+			ctx.Log().Errorf("appid:%s access token 刷新失败,err:%v", appid, err)
+			continue
+		}
+		if !b {
+			ctx.Log().Infof("appid:%s access token 不用刷新", appid)
+			continue
+		}
+		ctx.Log().Infof("appid:%s access token 刷新成功", appid)
+	}
 	return nil
 }
