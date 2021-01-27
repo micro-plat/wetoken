@@ -24,7 +24,7 @@ func (u *RefreshTokenHandler) Handle(ctx hydra.IContext) (r interface{}) {
 		return err
 	}
 	if len(appids) <= 0 {
-		ctx.Log().Infof("没有需要刷新的ticket")
+		ctx.Log().Infof("没有需要刷新的token")
 		return
 	}
 

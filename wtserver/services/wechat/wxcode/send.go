@@ -16,7 +16,7 @@ type SendMessgHandler struct {
 	msg   message.IMessage
 }
 
-func NewSendMessgHandler(appid string) (u *SendMessgHandler) {
+func NewSendMessgHandler() (u *SendMessgHandler) {
 	return &SendMessgHandler{}
 }
 

@@ -15,7 +15,7 @@ type GetTokenHandler struct{}
 func NewGetTokenHandler() (u *GetTokenHandler) {
 	return &GetTokenHandler{}
 }
-func (u *GetTokenHandler) Query(ctx hydra.IContext) (r interface{}) {
+func (u *GetTokenHandler) QueryHandle(ctx hydra.IContext) (r interface{}) {
 	var result struct {
 		ErrCode int64  `json:"errcode"`
 		ErrMsg  string `json:"errmsg"`

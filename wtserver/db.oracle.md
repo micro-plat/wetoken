@@ -21,7 +21,7 @@
 | 字段名      | 类型         | 默认值  | 为空 | 约束  | 描述          |
 | ----------- | ------------ | :-----: | :--: | :---: | :------------ |
 | appid       | varchar2(64) |         |  否  | PK, IS | appid         |
-| ticket      | varchar2(64) |         |  否  |  IS   | js api ticket |
+| ticket      | varchar2(256) |         |  否  |  IS   | js api ticket |
 | expire      | number(20)   |         |  否  |  IS   | 过期时长      |
 | expire_date | date         |         |  否  |  IS   | 过期日期      |
 | update_time | date         | sysdate |  否  |  IS   | 更新日期      |
@@ -32,7 +32,7 @@
 | 字段名       | 类型         | 默认值  | 为空 | 约束  | 描述         |
 | ------------ | ------------ | :-----: | :--: | :---: | :----------- |
 | appid        | varchar2(64) |         |  否  | PK, IS | appid        |
-| access_token | varchar2(64) |         |  否  |  IS   | access token |
+| access_token | varchar2(256) |         |  否  |  IS   | access token |
 | expire       | number(20)   |         |  否  |  IS   | 过期时长     |
 | expire_date  | date         |         |  否  |  IS   | 过期日期     |
 | update_time  | date         | sysdate |  否  |  IS   | 更新日期     |

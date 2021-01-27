@@ -12,7 +12,9 @@ type CreateHandler struct {
 
 //NewCreateHandler 创建服务
 func NewCreateHandler() (u *CreateHandler) {
-	return &CreateHandler{}
+	return &CreateHandler{
+		app: app.NewWechatApp(),
+	}
 }
 
 //Handle 创建app base info
