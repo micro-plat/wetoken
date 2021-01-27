@@ -1,4 +1,5 @@
 
+	DROP TABLE wechat_user_info;
 	create table wechat_user_info(
 		user_id number(10)  not null ,
 		appid varchar2(32)  not null ,

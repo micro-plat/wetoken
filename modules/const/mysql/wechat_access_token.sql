@@ -1,4 +1,5 @@
 
+	DROP TABLE IF EXISTS  wechat_access_token;
 	CREATE TABLE  wechat_access_token (
 		appid VARCHAR(64)  not null  comment 'appid' ,
 		access_token VARCHAR(64)  not null  comment 'access token' ,

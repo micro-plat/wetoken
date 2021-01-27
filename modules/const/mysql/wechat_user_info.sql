@@ -1,4 +1,5 @@
 
+	DROP TABLE IF EXISTS  wechat_user_info;
 	CREATE TABLE  wechat_user_info (
 		user_id BIGINT(10)  not null AUTO_INCREMENT comment '用户编号' ,
 		appid VARCHAR(32)  not null  comment 'appid' ,

@@ -24,7 +24,10 @@ func init() {
 
 	install()
 
-	sql.Install()
+	hydra.OnReadying(func() error {
+		sql.Install()
+		return nil
+	})
 
 	App.OnStarting(func(appConf xapp.IAPPConf) error {
 		_, err := hydra.C.DB().GetDB()

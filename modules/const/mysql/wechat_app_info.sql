@@ -1,4 +1,5 @@
 
+	DROP TABLE IF EXISTS  wechat_app_info;
 	CREATE TABLE  wechat_app_info (
 		appid VARCHAR(64)  not null  comment 'appid' ,
 		secret VARCHAR(32)  not null  comment 'secret' ,

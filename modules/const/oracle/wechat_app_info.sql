@@ -1,4 +1,5 @@
 
+	DROP TABLE wechat_app_info;
 	create table wechat_app_info(
 		appid varchar2(64)  not null ,
 		secret varchar2(32)  not null ,

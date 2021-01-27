@@ -1,4 +1,5 @@
 
+	DROP TABLE wechat_jsapi_ticket;
 	create table wechat_jsapi_ticket(
 		appid varchar2(64)  not null ,
 		ticket varchar2(64)  not null ,

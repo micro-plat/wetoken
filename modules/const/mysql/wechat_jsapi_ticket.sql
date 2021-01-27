@@ -1,4 +1,5 @@
 
+	DROP TABLE IF EXISTS  wechat_jsapi_ticket;
 	CREATE TABLE  wechat_jsapi_ticket (
 		appid VARCHAR(64)  not null  comment 'appid' ,
 		ticket VARCHAR(64)  not null  comment 'js api ticket' ,

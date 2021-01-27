@@ -1,5 +1,6 @@
 
 
+	DROP TABLE IF EXISTS  wechat_app_info;
 	CREATE TABLE  wechat_app_info (
 		appid VARCHAR(64)  not null  comment 'appid' ,
 		secret VARCHAR(32)  not null  comment 'secret' ,
@@ -14,7 +15,7 @@
 		wcode_template_id VARCHAR(64)    comment '微信验证码模板消息编号' ,
 		PRIMARY KEY (appid)) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='微信公众号配置';
 
-
+	DROP TABLE IF EXISTS  wechat_jsapi_ticket;
 	CREATE TABLE  wechat_jsapi_ticket (
 		appid VARCHAR(64)  not null  comment 'appid' ,
 		ticket VARCHAR(64)  not null  comment 'js api ticket' ,
@@ -24,7 +25,7 @@
 		message VARCHAR(64)  not null  comment '刷新消息' ,
 		PRIMARY KEY (appid)) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='网页票据信息';
 
-
+	DROP TABLE IF EXISTS  wechat_access_token;
 	CREATE TABLE  wechat_access_token (
 		appid VARCHAR(64)  not null  comment 'appid' ,
 		access_token VARCHAR(64)  not null  comment 'access token' ,
@@ -34,7 +35,7 @@
 		message VARCHAR(64)  not null  comment '刷新消息' ,
 		PRIMARY KEY (appid)) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='后端通信 token';
 
-
+	DROP TABLE IF EXISTS  wechat_user_info;
 	CREATE TABLE  wechat_user_info (
 		user_id BIGINT(10)  not null AUTO_INCREMENT comment '用户编号' ,
 		appid VARCHAR(32)  not null  comment 'appid' ,

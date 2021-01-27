@@ -11,7 +11,11 @@ import (
 )
 
 func init() {
-	sql.Install()
+	//加载数据表结构创建sql
+	hydra.OnReadying(func() error {
+		sql.Install()
+		return nil
+	})
 }
 
 var once1 sync.Once

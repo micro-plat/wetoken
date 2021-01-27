@@ -1,5 +1,5 @@
 
-
+	DROP TABLE wechat_app_info;
 	create table wechat_app_info(
 		appid varchar2(64)  not null ,
 		secret varchar2(32)  not null ,
@@ -33,7 +33,7 @@
 	alter table wechat_app_info
 	add constraint pk_app_info primary key(appid);
 	
-
+	DROP TABLE wechat_jsapi_ticket;
 	create table wechat_jsapi_ticket(
 		appid varchar2(64)  not null ,
 		ticket varchar2(64)  not null ,
@@ -57,7 +57,7 @@
 	alter table wechat_jsapi_ticket
 	add constraint pk_jsapi_ticket primary key(appid);
 	
-
+	DROP TABLE wechat_access_token;
 	create table wechat_access_token(
 		appid varchar2(64)  not null ,
 		access_token varchar2(64)  not null ,
@@ -81,7 +81,7 @@
 	alter table wechat_access_token
 	add constraint pk_access_token primary key(appid);
 	
-
+	DROP TABLE wechat_user_info;
 	create table wechat_user_info(
 		user_id number(10)  not null ,
 		appid varchar2(32)  not null ,

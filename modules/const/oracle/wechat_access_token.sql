@@ -1,4 +1,5 @@
 
+	DROP TABLE wechat_access_token;
 	create table wechat_access_token(
 		appid varchar2(64)  not null ,
 		access_token varchar2(64)  not null ,
