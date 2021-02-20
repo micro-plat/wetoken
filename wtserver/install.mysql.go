@@ -33,7 +33,7 @@ func pubConf() {
 
 //测试环境配置
 func devConf() {
-	hydra.Conf.API("9999")
+	hydra.Conf.API("9999").Metric("http://192.168.106.219:8086", "convoy", "@every 10s")
 	hydra.Conf.CRON()
 	hydra.Conf.Vars().DB().MySQL("db", "wechat", "12345678", "192.168.0.36:3306", "wechat_v2", db.WithConnect(20, 10, 600))
 }
