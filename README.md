@@ -25,25 +25,29 @@
 多个系统共用一个公众号，可使用wtserver，集中维护token，jstikcet。根据向导即可安装数据表结构，启动后即可对外提供服务。
 
 
-编译安装
-
-```sh
- ~/work/bin$ go install github.com/micro-plat/wetoken/wtserver # mysql
-
- 或
-
- ~/work/bin$ go install -tags "oci" github.com/micro-plat/wetoken/wtserver # oracle
-```
-
  安装数据表
 
  ```sh
-wtserver install -r zk://192.168.106.18 -c t
+go install -tags "dev" github.com/micro-plat/wetoken/wtserver # mysql
+go install -tags "dev oracle" github.com/micro-plat/wetoken/wtserver # oracle
+wtserver db install -r zk://192.168.106.18
  ```
+
+
+编译安装
+
+```sh
+go install github.com/micro-plat/wetoken/wtserver # mysql
+
+ 或
+
+go install -tags "oracle" github.com/micro-plat/wetoken/wtserver # oracle
+```
+
 
 启动服务
 ```sh
-wtserver start -r zk://192.168.106.18 -c t
+wtserver run -r zk://192.168.106.18
 
 ```
 
@@ -52,68 +56,70 @@ wtserver start -r zk://192.168.106.18 -c t
 只有一个系统使用公众号，为减少子系统维护，可直接通过代码集成到现有系统中。
 
 
-## 1、创建任务表:
+## 1、创建任务表
 
-#### 1. 编译 `wetoken`
+#### 1. 引入 `wetoken`
 
-```sh
- ~/work/bin$ go install github.com/micro-plat/wetoken #mysql
+```go
+package main
 
- 或
-
- ~/work/bin$ go install -tags "oci" github.com/micro-plat/wetoken # oracle
-
+import "github.com/micro-plat/wetoken/wetoken"
 ```
 
 #### 2. 运行命令
 
-`wetoken [注册中心地址] [平台名称]` 即可将 `wetoken` 需要的表创建到`/平台/var/db/db` 配置对应的数据库中。
+`server [注册中心地址]` 即可将 `wetoken` 需要的表创建到`/平台/var/db/db` 配置对应的数据库中。
 
 ```sh
-~/work/bin$ wetoken zk://192.168.0.109 mall #根据/mall/var/db/db创建数据库
-
-或
-
-~/work/bin$ wetoken zk://192.168.0.109 mall mdb #根据/mall/var/db/mdb创建数据库
-
+go install -tags "dev" # mysql
+go install -tags "dev oracle" # oracle
+server db install -r zk://192.168.106.18
 ```
-
 
 ## 2、编码
 
 绑定服务
 
 ```go
-app.Initializing(func(c component.IContainer) error {
-    wetoken.Bind(app，true,"wx9e02ddcc34513fd4")　//绑定公众号查询，刷新接口和自动刷新任务
-}
+
+App.OnStarting(func(appConf app.IAPPConf) error {
+  err := wetoken.Bind(false)　//绑定公众号token,ticket对应的刷新，获取，消息推送接口等
+  return err
+})
 
 或
 
-app.Initializing(func(c component.IContainer) error {
-    wetoken.Cron(app，true,"wx9e02ddcc34513fd4")　//只绑定自动刷新任务
-}
+App.OnStarting(func(appConf app.IAPPConf) error {
+  err := wetoken.Cron(false)　//只绑定定时任务，每隔1分钟检查一次token,ticket
+  return err
+})
 ```
 
 
 
-> 当`app.IsDebug==true`时会自动绑定公众号添加服务，可通过接口添加公众号
+> 当绑定参数为`true`时会自动绑定公众号添加服务，可通过接口添加公众号
 
 获取token
 
 ```go
 
-tk:=token.NewToken(container， appid)
-token，err:=tk.Get()//不存在或已过期，自动从官网获取
+token, err:=wetoken.GetWxToken(appid) //不存在或已过期，自动从官网获取
 
 ```
 
-获取jsticket
+获取ticket
 
 ```go
 
-tk:=token.NewTicket(container， appid)
-ticket，err:=tk.Get()//不存在或已过期，自动从官网获取
+ticket, err:=wetoken.GetWxTicket(appid) //不存在或已过期，自动从官网获取
+
+```
+
+获取secret
+
+```go
+
+secret, err:=wetoken.GetWxSecret(appid)
 
 ```
 ## 三、微信 sdk 中使用 token
@@ -150,13 +156,13 @@ func main(){
 
 ##### 服务列表
 
-| 服务名                         | 类型  | wetoken.Bind | wetoken.Cron | 说明               |
-| :----------------------------- | :---: | :----------: | :----------: | :----------------- |
-| /wechat/app/create             |  api  |     可选     |     可选     | 添加公众号信息     |
-| /[appid]/wechat/token/get      |  api  |      √       |      ×       | 获取最新token      |
-| /[appid]/wechat/ticket/get     |  api  |      √       |      ×       | 获取最新ticket     |
-| /[appid]/wechat/token/refresh  | cron  |      √       |      √       | 定时刷新token任务  |
-| /[appid]/wechat/ticket/refresh | cron  |      √       |      √       | 定时刷新ticket任务 |
+| 服务名                     | 类型  | wetoken.Bind | wetoken.Cron | 说明               |
+| :------------------------- | :---: | :----------: | :----------: | :----------------- |
+| /wechat/app/create         |  api  |     可选     |     可选     | 添加公众号信息     |
+| /[appid]/wechat/token/get  |  api  |      √       |      ×       | 获取最新token      |
+| /[appid]/wechat/ticket/get |  api  |      √       |      ×       | 获取最新ticket     |
+| /wechat/token/refresh      | cron  |      √       |      √       | 定时刷新token任务  |
+| /wechat/ticket/refresh     | cron  |      √       |      √       | 定时刷新ticket任务 |
 
 
 

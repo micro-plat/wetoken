@@ -2,11 +2,11 @@ module github.com/micro-plat/wetoken
 
 go 1.16
 
-replace github.com/micro-plat/hydra => ../../../github.com/micro-plat/hydra
-
-replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
-
-replace github.com/lib4dev/wechat => ../../../github.com/lib4dev/wechat
+replace (
+	github.com/micro-plat/hydra => ../../../github.com/micro-plat/hydra
+	github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go
+	github.com/lib4dev/wechat => ../../../github.com/lib4dev/wechat
+)
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
