@@ -24,7 +24,7 @@ func (u *RefreshTokenHandler) Handle(ctx hydra.IContext) (r interface{}) {
 		return err
 	}
 	if len(appids) <= 0 {
-		ctx.Log().Infof("没有需要刷新的token")
+		ctx.Log().Debug("没有需要刷新的token")
 		return
 	}
 
@@ -36,7 +36,7 @@ func (u *RefreshTokenHandler) Handle(ctx hydra.IContext) (r interface{}) {
 			continue
 		}
 		if !b {
-			ctx.Log().Infof("appid:%s access token 不用刷新", appid)
+			ctx.Log().Debugf("appid:%s access token 不用刷新", appid)
 			continue
 		}
 		ctx.Log().Infof("appid:%s access token 刷新成功", appid)
