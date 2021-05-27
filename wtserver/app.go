@@ -14,8 +14,6 @@ import (
 
 func init() {
 
-	install()
-
 	hydra.OnReadying(func() error {
 		sql.Install()
 		return nil
