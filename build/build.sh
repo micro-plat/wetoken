@@ -16,7 +16,9 @@ echo "-----------编译的tags:$publishtags--------"
 echo "---------------打包开始--------------"
 echo "-----------编译wtserver项目--------"
 cd ../wtserver
-go build -tags "$publishtags" -o "../build/out/wtserver/bin/wtserver"
+echo "go build -mod=mod -tags "$publishtags" -o ../build/out/wtserver/bin/wtserver"
+go build -mod=mod -tags "$publishtags" -o "../build/out/wtserver/bin/wtserver"
+
 if [ $? -ne 0 ]; then
 	echo "wtserver 项目编译出错,请检查"
 	exit 1
