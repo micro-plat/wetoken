@@ -11,22 +11,23 @@ type Handlers []Handler
 //ICustomMiddleware 用户自定义组件
 type ICustomMiddleware interface {
 	Add(handler ...Handler)
+	Count() int
 }
 
 //DispFunc 返回DispFunc
-func (c Handlers) DispFunc() []dispatcher.HandlerFunc {
+func (c Handlers) DispFunc(tp ...string) []dispatcher.HandlerFunc {
 	list := make([]dispatcher.HandlerFunc, 0, len(c))
 	for _, item := range c {
-		list = append(list, item.DispFunc())
+		list = append(list, item.DispFunc(tp...))
 	}
 	return list
 }
 
 //GinFunc 返回GinFunc
-func (c Handlers) GinFunc() []gin.HandlerFunc {
+func (c Handlers) GinFunc(tp ...string) []gin.HandlerFunc {
 	list := make([]gin.HandlerFunc, 0, len(c))
 	for _, item := range c {
-		list = append(list, item.GinFunc())
+		list = append(list, item.GinFunc(tp...))
 	}
 	return list
 }
@@ -34,4 +35,9 @@ func (c Handlers) GinFunc() []gin.HandlerFunc {
 //Add 添加组件
 func (c Handlers) Add(handler ...Handler) {
 	c = append(c, handler...)
+}
+
+//Count 统计组件数量
+func (c Handlers) Count() int {
+	return len(c)
 }

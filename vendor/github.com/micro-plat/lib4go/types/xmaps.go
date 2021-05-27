@@ -7,17 +7,30 @@ import (
 	"reflect"
 )
 
+type IXMaps interface {
+	ToStructs(o interface{}) error
+	Append(i ...IXMap)
+	ToAnyStructs(o interface{}) error
+	Maps() []XMap
+	IsEmpty() bool
+	Len() int
+	Get(i int) IXMap
+}
+
+var _ IXMaps = &XMaps{}
+
 //XMaps 多行数据
 type XMaps []XMap
 
 //NewXMaps 构建xmap对象
 func NewXMaps(len ...int) XMaps {
-	return make(XMaps, 0, GetIntByIndex(len, 0, 1))
+	v := make(XMaps, 0, GetIntByIndex(len, 0))
+	return v
 }
 
 //NewXMapsByJSON 根据json创建XMaps
 func NewXMapsByJSON(j string) (XMaps, error) {
-	var query XMaps
+	var query = make(XMaps, 0, 1)
 	d := json.NewDecoder(bytes.NewBuffer(StringToBytes(j)))
 	d.UseNumber()
 	err := d.Decode(&query)
@@ -25,9 +38,11 @@ func NewXMapsByJSON(j string) (XMaps, error) {
 }
 
 //Append 追加xmap
-func (q *XMaps) Append(i ...XMap) XMaps {
-	*q = append(*q, i...)
-	return *q
+func (q *XMaps) Append(i ...IXMap) {
+	for _, v := range i {
+		*q = append(*q, v.ToMap())
+	}
+	return
 }
 
 //ToStructs 将当前对象转换为指定的struct
@@ -80,6 +95,11 @@ func (q XMaps) ToAnyStructs(o interface{}) error {
 	return nil
 }
 
+//Maps map列表
+func (q XMaps) Maps() []XMap {
+	return q
+}
+
 //IsEmpty 当前数据集是否为空
 func (q XMaps) IsEmpty() bool {
 	return q == nil || len(q) == 0
@@ -91,7 +111,7 @@ func (q XMaps) Len() int {
 }
 
 //Get 获取指定索引的数据
-func (q XMaps) Get(i int) XMap {
+func (q XMaps) Get(i int) IXMap {
 	if q == nil || i >= len(q) || i < 0 {
 		return XMap{}
 	}

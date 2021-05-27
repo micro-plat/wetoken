@@ -6,7 +6,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
-	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
 	"github.com/micro-plat/hydra/global"
 	"github.com/micro-plat/hydra/services"
@@ -51,19 +50,52 @@ func (c *rpath) Params() types.XMap {
 
 //GetService 获取服务名称
 func (c *rpath) GetService() string {
-	return c.ctx.GetService()
+	tp := c.appConf.GetServerConf().GetServerType()
+	switch tp {
+	case global.API, global.Web, global.WS, global.RPC:
+		routerObj, err := services.GetRouter(tp).GetRouters()
+		if err != nil {
+			return ""
+		}
+		router, err := routerObj.Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
+		if err != nil {
+			return ""
+		}
+		return router.Service
+	default:
+		return c.ctx.GetRouterPath()
+	}
 }
+
+//GetGroup 获取当前服务注册的group名
+func (c *rpath) GetGroup() string {
+	return services.Def.GetGroup(c.appConf.GetServerConf().GetServerType(), c.GetService())
+}
+
+//GetPageAndTag 获取服务对应的页面路径与tag标签(page:静态文件prefix+服务原始注册路径,tag：对象中的函数名)
+func (c *rpath) GetPageAndTag() (page string, tag string, ok bool) {
+
+	//获取服务注册的路径名，tag标签
+	tp := c.appConf.GetServerConf().GetServerType()
+	page, tag, ok = services.Def.GetRawPathAndTag(tp, c.GetService())
+	if !ok {
+		return "", "", false
+	}
+
+	//处理tag为空时，获取当前method
+	if tag == "" {
+		tag = c.ctx.GetMethod()
+	}
+
+	return page, tag, ok
+}
+
 func (c *rpath) GetEncoding() string {
 	if c.encoding != "" {
 		return c.encoding
 	}
 
-	//从router配置获取
-	routerObj, err := c.GetRouter()
-	if err != nil {
-		return c.encoding
-	}
-	if c.encoding = routerObj.Encoding; c.encoding != "" {
+	if c.encoding = c.getEncoding(); c.encoding != "" {
 		return c.encoding
 	}
 
@@ -83,20 +115,23 @@ func (c *rpath) GetEncoding() string {
 	return c.encoding
 }
 
-//GetRouter 获取路由信息
-func (c *rpath) GetRouter() (*router.Router, error) {
+//getEncoding 获取路由配置的编码
+func (c *rpath) getEncoding() string {
 	tp := c.appConf.GetServerConf().GetServerType()
 	switch tp {
-	case global.API, global.Web, global.WS:
+	case global.API, global.Web, global.WS, global.RPC:
 		routerObj, err := services.GetRouter(tp).GetRouters()
 		if err != nil {
-			return nil, err
+			return ""
 		}
-		return routerObj.Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
+		router, err := routerObj.Match(c.ctx.GetRouterPath(), c.ctx.GetMethod())
+		if err != nil {
+			return ""
+		}
+		return router.Encoding
 	default:
-		return router.NewRouter(c.ctx.GetRouterPath(), c.ctx.GetRouterPath(), []string{}, router.WithEncoding("utf-8")), nil
+		return ""
 	}
-
 }
 
 //GetURL 获取请求路径

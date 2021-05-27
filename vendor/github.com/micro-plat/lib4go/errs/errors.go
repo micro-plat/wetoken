@@ -15,13 +15,11 @@ type IError interface {
 	Error() string
 	GetError() error
 	GetCode() int
-	CanIgnore() bool
 }
 
 //Error 错误信息
 type Error struct {
-	code      int
-	canIgnore bool
+	code int
 	error
 }
 
@@ -40,26 +38,21 @@ func (a *Error) String() string {
 	return fmt.Sprintf("%d %s", a.code, a.Error())
 }
 
-//CanIgnore 是否可以忽略错误
-func (a *Error) CanIgnore() bool {
-	return a.canIgnore
+func (a *Error) Is(e error) bool {
+	return errors.Is(a.error, e)
 }
-
-//NewIgnoreError 当前一个可忽略的错误
-func NewIgnoreError(code int, err interface{}) *Error {
-	ex := NewError(code, err)
-	ex.canIgnore = true
-	return ex
+func (a *Error) As(target interface{}) bool {
+	return errors.As(a.error, target)
 }
 
 //NewErrorf 创建错误对象
 func NewErrorf(code int, f string, args ...interface{}) *Error {
-	return NewError(code, fmt.Sprintf(f, args...))
+	return NewError(code, fmt.Errorf(f, args...))
 }
 
 //NewError 创建错误对象
 func NewError(code int, err interface{}) *Error {
-	r := &Error{code: code, canIgnore: false}
+	r := &Error{code: code}
 	switch v := err.(type) {
 	case string:
 		r.error = errors.New(v)

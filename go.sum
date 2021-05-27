@@ -136,6 +136,7 @@ github.com/json-iterator/go v1.1.9/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/u
 github.com/jtolds/gls v4.20.0+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfVYBRgL+9YlvaHOwJU=
 github.com/juju/ansiterm v0.0.0-20180109212912-720a0952cc2a h1:FaWFmfWdAUKbSCtOU2QjDaorUexogfaMgbipgYATUMU=
 github.com/juju/ansiterm v0.0.0-20180109212912-720a0952cc2a/go.mod h1:UJSiEoRfvx3hP73CvoARgeLjaIOjybY9vj8PUPPFGeU=
+github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19 h1:WjT3fLi9n8YWh/Ih8Q1LHAPsTqGddPcHqscN+PJ3i68=
 github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19/go.mod h1:hY+WOq6m2FpbvyrI93sMaypsttvaIL5nhVR92dTMUcQ=
 github.com/klauspost/compress v1.4.1/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
 github.com/klauspost/cpuid v1.2.0/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
@@ -182,6 +183,8 @@ github.com/micro-plat/hydra v0.13.5 h1:FMxZiVKT8u1EHi84Rsg6LmKcjEGKrY6aQiEqhtTOo
 github.com/micro-plat/hydra v0.13.5/go.mod h1:1rTZbPf2uvESGJY+uNGNOuMnB6oEkQYjLxhRpJF15a4=
 github.com/micro-plat/hydra v1.1.1 h1:0M8N/MrpPhshvNoLX3xrnI/pvEsGrkbTxk0AYrCjb9M=
 github.com/micro-plat/hydra v1.1.1/go.mod h1:ltV1ZC8uMj06sRnf1jQLj6CjR2CT7lResvYdSQg9G5Q=
+github.com/micro-plat/hydra v1.1.6 h1:XXN/M5zm6pWi4ZySIpG6cC/Vt2b/FXDf9ysjBbpm3QI=
+github.com/micro-plat/hydra v1.1.6/go.mod h1:7a2f2Ci/y5w6B3nf3xCJwqe0W9Xf9GQb4auK+aYWC/I=
 github.com/micro-plat/lib4go v0.0.0-20190705091641-a9c3303797f1 h1:TKBE/Q54E4WSPA0OW8Uw1Vc6N0gFKkLGRonssjDn+7Y=
 github.com/micro-plat/lib4go v0.0.0-20190705091641-a9c3303797f1/go.mod h1:zrC6IThH4iNBu3XkjduKLC+TulO/h3XZ6sWEsFx+YQY=
 github.com/micro-plat/lib4go v0.1.1/go.mod h1:QWcBeMuPBuQSm8sr0wq2DwfL864Nj6gyvDGt1bKDZTw=
@@ -192,6 +195,8 @@ github.com/micro-plat/lib4go v0.4.1 h1:4DABzxQEXbSrSeWaJEb3rOpFGtJ/g8Xc7tc7wFKki
 github.com/micro-plat/lib4go v0.4.1/go.mod h1:yJt+7OPs98Qawn1JKQvn2qwtJi2yEg/t1gRi+k7oUZo=
 github.com/micro-plat/lib4go v1.1.0 h1:AoO0LrQXvffW1xfY3oI+fVt4CpJ+WddOhCFMu10Pt50=
 github.com/micro-plat/lib4go v1.1.0/go.mod h1:svEFcpefzbKSjaRBzv0OWZHWOj6abM0/95c112Yu8/8=
+github.com/micro-plat/lib4go v1.1.6 h1:DcXFu6Av3bicPn4R1qftY1/oE8C0aVttCX9Xk4moflA=
+github.com/micro-plat/lib4go v1.1.6/go.mod h1:svEFcpefzbKSjaRBzv0OWZHWOj6abM0/95c112Yu8/8=
 github.com/micro-plat/qtask v0.0.0-20190708085554-931550afc18b/go.mod h1:uA1h0N/jWhAWpcA61dagfjBQrHy1Ph4Vg4D0kdwi3lc=
 github.com/micro-plat/wechat v0.0.0-20190124071457-da29af712665 h1:/YJgx5UDceVDw66KzIkwRAa9zoqeRazqTkEk2Oboa4s=
 github.com/micro-plat/wechat v0.0.0-20190124071457-da29af712665/go.mod h1:wzBmglD9rV0Fdt/GkxuLY46KpdXmj8UygdJBUzu7II0=

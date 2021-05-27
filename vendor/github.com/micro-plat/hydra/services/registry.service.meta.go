@@ -2,30 +2,39 @@ package services
 
 import (
 	"fmt"
+	"net/http"
+	"strings"
 
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/context"
 )
 
 type metaServices struct {
-	services  []string
-	handlers  map[string]context.IHandler
-	fallbacks map[string]context.IHandler
+	pathActs   map[string][]string
+	rawService map[string]*rawUnit
+	groups     map[string]string
+	handlers   map[string]context.IHandler
+	fallbacks  map[string]context.IHandler
 }
 
 func newService() *metaServices {
 	return &metaServices{
-		services:  make([]string, 0, 1),
-		handlers:  make(map[string]context.IHandler),
-		fallbacks: make(map[string]context.IHandler),
+		pathActs:   make(map[string][]string),
+		rawService: make(map[string]*rawUnit),
+		groups:     make(map[string]string),
+		handlers:   make(map[string]context.IHandler),
+		fallbacks:  make(map[string]context.IHandler),
 	}
 }
 
-func (s *metaServices) AddHanler(service string, h context.IHandler) error {
+func (s *metaServices) AddHanler(service string, group string, h context.IHandler, r *rawUnit) error {
 	if _, ok := s.handlers[service]; ok {
 		return fmt.Errorf("服务不能重复注册，%s找到有多次注册%v", service, s.handlers)
 	}
 	s.handlers[service] = h
-	s.services = append(s.services, service)
+	s.rawService[service] = r
+	s.groups[service] = group
+	s.cachePathActs(service)
 	return nil
 }
 
@@ -38,24 +47,68 @@ func (s *metaServices) AddFallback(service string, h context.IHandler) error {
 	return nil
 }
 
-func (s *metaServices) remove(service string) {
-	delete(s.handlers, service)
-	for i, srv := range s.services {
-		if srv == service {
-			s.services = append(s.services[:i], s.services[i+1:]...)
-			return
-		}
+func (s *metaServices) cachePathActs(service string) {
+	parties := strings.Split(service, "$")
+	methods := router.DefMethods
+	if len(parties) == 2 {
+		methods = []string{parties[1]}
 	}
+	path := strings.TrimSuffix(parties[0], "/")
+
+	acts, pok := s.pathActs[path]
+	if !pok {
+		acts = make([]string, 0)
+	}
+	acts = append(acts, methods...)
+	s.pathActs[path] = acts
 }
 
+//Has 是否包含服务
+func (s *metaServices) Has(service string) (ok bool) {
+	_, ok = s.handlers[service]
+	if ok {
+		return true
+	}
+	parties := strings.Split(service, "$")
+	if len(parties) != 2 {
+		return false
+	}
+	path := strings.TrimSuffix(parties[0], "/")
+
+	acts, pok := s.pathActs[path]
+	if !pok {
+		return false
+	}
+	method := parties[1]
+	if strings.EqualFold(method, http.MethodOptions) {
+		return true
+	}
+	for i := range acts {
+		if strings.EqualFold(acts[i], method) {
+			return true
+		}
+	}
+	return false
+}
+
+//GetHandlers 获取服务的处理对象
 func (s *metaServices) GetHandlers(service string) (h context.IHandler, ok bool) {
 	h, ok = s.handlers[service]
 	return
 }
 
-//GetServices 获取已注册的服务
-func (s *metaServices) GetServices() []string {
-	return s.services
+//GetGroup 获取服务的分组信息
+func (s *metaServices) GetGroup(service string) string {
+	return s.groups[service]
+}
+
+//GetRawPathAndTag 获取服务原始注册路径与方法名
+func (s *metaServices) GetRawPathAndTag(service string) (path string, tagName string, ok bool) {
+	u, ok := s.rawService[service]
+	if ok {
+		return u.RawPath, u.RawMTag, true
+	}
+	return "", "", false
 }
 
 //GetFallback 获取服务对应的降级函数

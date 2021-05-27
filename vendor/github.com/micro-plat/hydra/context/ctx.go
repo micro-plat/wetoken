@@ -9,7 +9,6 @@ import (
 
 	"github.com/micro-plat/hydra/conf"
 	"github.com/micro-plat/hydra/conf/app"
-	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/pkgs"
 	"github.com/micro-plat/lib4go/logger"
 	"github.com/micro-plat/lib4go/types"
@@ -101,14 +100,17 @@ type IPath interface {
 	//GetMethod 获取服务请求方法GET POST PUT DELETE 等
 	GetMethod() string
 
-	//GetService 获取服务名称
+	//GetService 获取服务名称(不包括$method)
 	GetService() string
 
 	//Param 路由参数
 	Params() types.XMap
 
-	//GetRouter 获取当前请求对应的路由信息
-	GetRouter() (*router.Router, error)
+	//GetGroup 获取当前服务注册的group名
+	GetGroup() string
+
+	//GetPageAndTag 获取服务对应的页面路径与tag标签(page:静态文件prefix+服务原始注册路径,tag：对象中的函数名)
+	GetPageAndTag() (page string, tag string, ok bool)
 
 	//GetRequestPath 获取请求路径
 	GetRequestPath() string
@@ -238,7 +240,7 @@ type IResponse interface {
 	Write(s int, v ...interface{}) error
 
 	//File 向响应流中写入文件(立即写入)
-	File(path string)
+	File(path string, fs http.FileSystem)
 
 	//Abort 停止当前服务执行(立即写入)
 	Abort(int, ...interface{})
@@ -266,6 +268,9 @@ type IAuth interface {
 
 	//Bind 将请求的认证对象绑定为特定的结构体
 	Bind(out interface{}) error
+
+	//Clear 清除用户登录信息
+	Clear()
 }
 
 //IUser 用户相关信息

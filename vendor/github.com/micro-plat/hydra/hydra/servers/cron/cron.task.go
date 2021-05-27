@@ -8,6 +8,8 @@ import (
 	cron "github.com/robfig/cron/v3"
 )
 
+var DefMethod = "GET"
+
 //CronTask 定时任务
 type CronTask struct {
 	*task.Task
@@ -25,7 +27,7 @@ func NewCronTask(t *task.Task) (r *CronTask, err error) {
 		Task:    t,
 		Counter: &Counter{},
 		Round:   &Round{},
-		method:  "GET",
+		method:  DefMethod,
 		form:    make(map[string]interface{}),
 		header:  map[string]string{"Client-IP": "127.0.0.1"},
 	}
@@ -45,20 +47,12 @@ func (m *CronTask) GetName() string {
 	return m.Task.GetUNQ()
 }
 
-//NextTime 下次执行时间
-func (m *CronTask) NextTime(t time.Time) time.Time {
-	if m.IsImmediately() {
-		return time.Now()
-	}
-	return m.schedule.Next(t)
-}
-
 //GetService 服务名
 func (m *CronTask) GetService() string {
 	return m.Task.Service
 }
 
-//GetMethod 方法名
+//GetMethod GetMethod
 func (m *CronTask) GetMethod() string {
 	return m.method
 }
@@ -71,4 +65,12 @@ func (m *CronTask) GetForm() map[string]interface{} {
 //GetHeader 头信息
 func (m *CronTask) GetHeader() map[string]string {
 	return m.header
+}
+
+//NextTime 下次执行时间
+func (m *CronTask) NextTime(t time.Time) time.Time {
+	if m.IsImmediately() {
+		return time.Now()
+	}
+	return m.schedule.Next(t)
 }

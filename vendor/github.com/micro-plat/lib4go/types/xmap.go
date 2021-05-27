@@ -86,6 +86,9 @@ type IXMap interface {
 	//MustFloat64   值是否是int并返回相关的值与判断结果
 	MustFloat64(name string) (float64, bool)
 
+	//Delete 删除指定名称的值
+	Delete(name string)
+
 	//Marshal 将当前对转转换为json
 	Marshal() []byte
 
@@ -103,6 +106,9 @@ type IXMap interface {
 
 	//Len 获取元素个数
 	Len() int
+
+	//ToKV 转换为可通过URL传递的键值对
+	ToKV(ecoding ...string) string
 
 	//ToStruct 将当前map转换为结构值对象
 	ToStruct(o interface{}) error
@@ -124,6 +130,18 @@ type IXMap interface {
 
 	//Merge 合并多个xmap
 	Merge(m IXMap)
+
+	//Each 循环器，传入处理函数，内部循环每个数据并调用处理函数
+	Each(fn func(string, interface{}))
+
+	//Iterator 迭代处理器，传入处理函数，函数返回结果为新值，新建新的map并返回
+	Iterator(fn func(string, interface{}) interface{}) XMap
+
+	//Count 计数器，传入处理函数，函数返回值为true则为需要计数，最后返回符合条件的数量和
+	Count(fn func(string, interface{}) bool) int
+
+	//Filter 过滤器，传入过滤函数，函数返回值为true则为需要的参数装入map返回
+	Filter(fn func(string, interface{}) bool) XMap
 
 	//MergeMap 合并map[string]interface{}
 	MergeMap(anr map[string]interface{})
@@ -309,7 +327,7 @@ func (q XMap) GetDatetime(name string, format ...string) (time.Time, error) {
 //GetStrings 获取字符串数组
 func (q XMap) GetStrings(name string, def ...string) (r []string) {
 	if v := q.GetString(name); v != "" {
-		if r = strings.Split(v, ";"); len(r) > 0 {
+		if r = strings.Split(v, ","); len(r) > 0 {
 			return r
 		}
 	}
@@ -424,6 +442,15 @@ func (q XMap) MustFloat64(name string) (float64, bool) {
 	return MustFloat64(q[name])
 }
 
+//ToKV 转换为可通过URL传递的键值对
+func (q XMap) ToKV(ecoding ...string) string {
+	u := url.Values{}
+	for k, v := range q {
+		u.Set(k, fmt.Sprint(v))
+	}
+	return u.Encode()
+}
+
 //ToStruct 将当前对象转换为指定的struct
 func (q XMap) ToStruct(out interface{}) error {
 	buff, err := json.Marshal(q)
@@ -437,6 +464,50 @@ func (q XMap) ToStruct(out interface{}) error {
 //ToAnyStruct 转换为任意struct,struct中无须设置数据类型(性能较差)
 func (q XMap) ToAnyStruct(out interface{}) error {
 	return Map2Struct(out, q, "json")
+}
+
+//Each 循环器，传入处理函数，内部循环每个数据并调用处理函数
+func (q XMap) Each(fn func(string, interface{})) {
+	for k, v := range q {
+		fn(k, v)
+	}
+}
+
+//Delete 删除指定键名的值
+func (q XMap) Delete(name string) {
+	delete(q, name)
+}
+
+//Iterator 迭代处理器，传入处理函数，函数返回结果为新值，新建新的map并返回
+func (q XMap) Iterator(fn func(string, interface{}) interface{}) XMap {
+	n := NewXMap()
+	for k, v := range q {
+		nv := fn(k, v)
+		n.SetValue(k, nv)
+	}
+	return n
+}
+
+//Count 计数器，传入处理函数，函数返回值为true则为需要计数，最后返回符合条件的数量和
+func (q XMap) Count(fn func(string, interface{}) bool) int {
+	var n = 0
+	for k, v := range q {
+		if fn(k, v) {
+			n++
+		}
+	}
+	return n
+}
+
+//Filter 过滤器，传入过滤函数，函数返回值为true则为需要的参数装入map返回
+func (q XMap) Filter(fn func(string, interface{}) bool) XMap {
+	n := NewXMap()
+	for k, v := range q {
+		if fn(k, v) {
+			n.SetValue(k, v)
+		}
+	}
+	return n
 }
 
 //ToMap 转换为map[string]interface{}

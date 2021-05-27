@@ -1,6 +1,6 @@
 module github.com/micro-plat/hydra
 
-go 1.15
+go 1.16
 
 require (
 	github.com/BurntSushi/toml v0.3.1
@@ -23,12 +23,13 @@ require (
 	github.com/manifoldco/promptui v0.8.0
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/micro-plat/gmq v1.0.1
-	github.com/micro-plat/lib4go v1.0.10
+	github.com/micro-plat/lib4go v1.1.6
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/pierrec/lz4 v2.6.0+incompatible // indirect
 	github.com/pkg/profile v1.2.1
 	github.com/pkg/sftp v1.12.0
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/stretchr/testify v1.6.1
 	github.com/ugorji/go/codec v1.2.2
 	github.com/ulikunitz/xz v0.5.9 // indirect
 	github.com/urfave/cli v1.22.5
@@ -45,5 +46,3 @@ require (
 	gopkg.in/yaml.v2 v2.3.0
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
-
-replace github.com/micro-plat/lib4go => ../../../github.com/micro-plat/lib4go

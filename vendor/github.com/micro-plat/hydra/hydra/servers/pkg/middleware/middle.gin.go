@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -13,8 +14,9 @@ import (
 
 type ginCtx struct {
 	*gin.Context
-	once    sync.Once
-	service string
+	tp            string
+	once          sync.Once
+	needClearAuth bool
 }
 
 func NewGinCtx(c *gin.Context) *ginCtx {
@@ -35,16 +37,11 @@ func (g *ginCtx) GetParams() map[string]interface{} {
 	}
 	return params
 }
+
 func (g *ginCtx) GetRouterPath() string {
 	return g.Context.FullPath()
 }
 
-func (g *ginCtx) GetService() string {
-	return g.service
-}
-func (g *ginCtx) Service(service string) {
-	g.service = service
-}
 func (g *ginCtx) GetBody() io.ReadCloser {
 	g.load()
 	return g.Request.Body
@@ -67,7 +64,7 @@ func (g *ginCtx) GetCookies() []*http.Cookie {
 	return g.Request.Cookies()
 }
 func (g *ginCtx) Find(path string) bool {
-	return true
+	return g.GetRouterPath() == path
 
 }
 func (g *ginCtx) Next() {
@@ -121,4 +118,42 @@ func (g *ginCtx) GetFile(fileKey string) (string, io.ReadCloser, int64, error) {
 //GetHTTPReqResp 获取GetHttpReqResp请求与响应对象
 func (g *ginCtx) GetHTTPReqResp() (*http.Request, http.ResponseWriter) {
 	return g.Request, g.Writer
+}
+func (g *ginCtx) ClearAuth(c ...bool) bool {
+	if len(c) == 0 {
+		return g.needClearAuth
+	}
+	g.needClearAuth = types.GetBoolByIndex(c, 0, false)
+	return g.needClearAuth
+}
+
+func (g *ginCtx) ServeContent(filepath string, fs http.FileSystem) (status int) {
+	f, err := fs.Open(filepath)
+	if err != nil {
+		status = toHTTPError(err)
+		g.AbortWithError(status, err)
+		return
+	}
+
+	d, err := f.Stat()
+	if err != nil {
+		status = toHTTPError(err)
+		g.AbortWithError(status, err)
+		return
+	}
+
+	http.ServeContent(g.Writer, g.Request, filepath, d.ModTime(), f)
+	status = g.Writer.Status()
+	return
+}
+
+func toHTTPError(err error) int {
+	if os.IsNotExist(err) {
+		return http.StatusNotFound
+	}
+	if os.IsPermission(err) {
+		return http.StatusForbidden
+	}
+	// Default:
+	return http.StatusInternalServerError
 }

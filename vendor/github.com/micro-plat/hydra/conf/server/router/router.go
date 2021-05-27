@@ -1,7 +1,6 @@
 package router
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -16,7 +15,7 @@ const TypeNodeName = "router"
 var Methods = []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions, http.MethodHead}
 
 //DefMethods 普通服务包含的路由
-var DefMethods = []string{http.MethodGet, http.MethodPost}
+var DefMethods = []string{http.MethodGet, http.MethodPost, http.MethodOptions}
 
 //GetWSHomeRouter 获取ws主页路由
 func GetWSHomeRouter() *Router {
@@ -29,13 +28,16 @@ func GetWSHomeRouter() *Router {
 
 //Routers 路由信息
 type Routers struct {
-	Routers []*Router `json:"routers,omitempty" toml:"routers,omitempty"`
+	Routers       []*Router                    `json:"routers,omitempty" toml:"routers,omitempty"`
+	MapPath       map[string]map[string]string `json:"-"`
+	ServicePrefix string                       `json:"-"`
 }
 
 func (h *Routers) String() string {
 	var sb strings.Builder
 	for _, v := range h.Routers {
-		sb.WriteString(fmt.Sprintf("%-16s %-32s %-32s %v\n", v.Path, v.Service, strings.Join(v.Action, " "), v.Pages))
+		sb.WriteString(v.String())
+		sb.WriteString("\n")
 	}
 	return sb.String()
 }
@@ -74,21 +76,21 @@ func (r *Router) GetEncoding() string {
 	}
 	return "utf-8"
 }
+func (r *Router) String() string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("%-16s %-32s %-32s %v %s", r.Path, r.Service, strings.Join(r.Action, " "), r.Pages, r.Encoding))
+	return sb.String()
+}
 
 //IsUTF8 是否是UTF8编码
 func (r *Router) IsUTF8() bool {
 	return strings.ToLower(r.GetEncoding()) == "utf-8"
 }
 
-//IsUTF8 是否是UTF8编码
-func (r *Router) String() string {
-	bytes, _ := json.Marshal(r)
-	return string(bytes)
-}
-
 //NewRouters 构建路由
 func NewRouters() *Routers {
 	r := &Routers{
+		MapPath: make(map[string]map[string]string),
 		Routers: make([]*Router, 0, 1),
 	}
 	return r
@@ -102,13 +104,6 @@ func (h *Routers) Append(path string, service string, action []string, opts ...O
 
 //Match 根据请求路径匹配指定的路由配置
 func (h *Routers) Match(path string, method string) (*Router, error) {
-	if path == "" || method == http.MethodOptions || method == http.MethodHead {
-		return &Router{
-			Path:   path,
-			Action: []string{method},
-		}, nil
-	}
-
 	for _, r := range h.Routers {
 		if r.Path == path && types.StringContains(r.Action, method) {
 			return r, nil
