@@ -3,10 +3,22 @@
 package sql
 
 import (
+	"sync"
+
+	_ "github.com/mattn/go-oci8"
 	"github.com/micro-plat/hydra"
 )
 
+var onceLock sync.Once
+
 func Install() {
+	onceLock.Do(func() {
+		installOnce()
+	})
+}
+
+//seq_user_info_id
+func installOnce() {
 	hydra.Installer.DB.AddSQL(`DROP TABLE wechat_app_info;
 	create table wechat_app_info(
 		appid varchar2(64)  not null ,
