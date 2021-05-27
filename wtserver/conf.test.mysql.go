@@ -17,6 +17,6 @@ func init() {
 		hydra.Conf.Vars().RLog("/log/save@logging")
 		hydra.Conf.API("8080", api.WithDNS("api.wetoken.18jiayou0.com"))
 		hydra.Conf.CRON()
-		hydra.Conf.Vars().DB().MySQL("db", "root", "rTo0CesHi2018Qx", "192.168.0.36:3306", "wechat_v2", db.WithConnect(10, 10, 600))
+		hydra.Conf.Vars().DB().MySQL("db", "root", "", "192.168.0.36:3306", "wechat_v2", db.WithConnect(10, 10, 600))
 	})
 }
