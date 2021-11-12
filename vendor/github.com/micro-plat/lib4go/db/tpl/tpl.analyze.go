@@ -22,14 +22,21 @@ func AnalyzeTPL(tpl string, input map[string]interface{}, prefix func() string, 
 	defer func() {
 		sql = replaceSpecialCharacter(sql)
 	}()
-	word, _ := regexp.Compile(`[\\]?[@|#|&|~|\||!|\$|\?]\w?[\.]?\w+`)
+
 	//@变量, 将数据放入params中
+	word, _ := regexp.Compile(`[\\]?([@#&~!$?]|[|]{1,2})(\w+(\.\w+)?)`)
 	sql = word.ReplaceAllStringFunc(tpl, func(s string) string {
-		fullKey, key, name := s[1:], s[1:], s[1:]
-		if strings.Index(fullKey, ".") > 0 {
-			name = strings.Split(fullKey, ".")[1]
+		index := 1
+		if strings.HasPrefix(s, "||") {
+			index = 2
 		}
-		pre := s[:1]
+		pre, key, name := s[:index], s[index:], s[index:]
+		if strings.Index(key, ".") > 0 {
+			name = strings.Split(key, ".")[1]
+		}
+		if strings.Contains(pre, "\\") {
+			pre = "\\"
+		}
 		value := input[name]
 		switch pre {
 		case "@":
@@ -77,15 +84,16 @@ func AnalyzeTPL(tpl string, input map[string]interface{}, prefix func() string, 
 				names = append(names, key)
 				params = append(params, value)
 				return fmt.Sprintf(",%s=%s", key, prefix())
+
 			}
 			return ""
 		default:
-			return s
+			return pre + key
 		}
 	})
 
-	word2, _ := regexp.Compile(`[\\][@|#|&|~|\||!|\$|\?|>|<]`)
 	//@变量, 将数据放入params中
+	word2, _ := regexp.Compile(`[\\][@#&~\|!\$\?><]`)
 	sql = word2.ReplaceAllStringFunc(sql, func(s string) string {
 		return s[1:]
 	})

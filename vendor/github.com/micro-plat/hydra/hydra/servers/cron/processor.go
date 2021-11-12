@@ -3,9 +3,11 @@ package cron
 import (
 	"errors"
 	"fmt"
+	"math"
 	"sync"
 	"time"
 
+	"github.com/micro-plat/hydra/conf/server/router"
 	"github.com/micro-plat/hydra/conf/server/task"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/adapter"
 	"github.com/micro-plat/hydra/hydra/servers/pkg/middleware"
@@ -36,7 +38,7 @@ type Processor struct {
 }
 
 //NewProcessor 创建processor
-func NewProcessor() (p *Processor) {
+func NewProcessor(routers ...*router.Router) (p *Processor) {
 	p = &Processor{
 		status:    unstarted,
 		closeChan: make(chan struct{}),
@@ -55,14 +57,18 @@ func NewProcessor() (p *Processor) {
 	p.engine.Use(middleware.Trace()) //跟踪信息
 	p.engine.Use(middlewares...)
 
-	//p.Engine = p.engine.DispEngine()
+	p.addRouter(routers...)
 
-	p.slots = make([]cmap.ConcurrentMap, p.length, p.length)
+	p.slots = make([]cmap.ConcurrentMap, p.length)
 	for i := 0; i < p.length; i++ {
 		p.slots[i] = cmap.New(2)
 	}
 
 	return p
+}
+
+func (s *Processor) addRouter(routers ...*router.Router) {
+	s.engine.Handles(routers, middleware.ExecuteHandler())
 }
 
 //Start 所有任务
@@ -91,9 +97,6 @@ func (s *Processor) Add(ts ...*task.Task) (err error) {
 			return fmt.Errorf("构建cron.task失败:%v", err)
 		}
 
-		if !s.engine.Find(task.GetService()) {
-			s.engine.Handle(DefMethod, task.Service, middleware.ExecuteHandler())
-		}
 		if _, _, err := s.add(task); err != nil {
 			return err
 		}
@@ -114,9 +117,6 @@ func (s *Processor) add(task *CronTask) (offset int, round int, err error) {
 		return -1, -1, errors.New("next time less than now.1")
 	}
 	offset, round = s.getOffset(now, nextTime)
-	if offset < 0 || round < 0 {
-		return -1, -1, errors.New("next time less than now.2")
-	}
 	task.Round.Update(round)
 	s.slots[offset].Set(utility.GetGUID(), task)
 	return
@@ -181,10 +181,12 @@ func (s *Processor) TaskCount() int {
 
 func (s *Processor) getOffset(now time.Time, next time.Time) (pos int, circle int) {
 	d := next.Sub(now) //剩余时间
-	delaySeconds := int(d/1e9) + 1
-	intervalSeconds := int(s.span.Seconds())
-	circle = int(delaySeconds / intervalSeconds / s.length)
-	pos = int(s.index+delaySeconds/intervalSeconds) % s.length
+	delaySeconds := int(math.Ceil(float64(d) / float64(1e9)))
+	circle = int(delaySeconds) / s.length
+	pos = int(s.index+delaySeconds) % s.length
+	if pos == s.index { //offset与当前index相同时，应减少一环
+		circle--
+	}
 	return
 }
 
@@ -197,8 +199,10 @@ func (s *Processor) execute() {
 	current.RemoveIterCb(func(k string, value interface{}) bool {
 		task := value.(*CronTask)
 		task.Round.Reduce()
-		if task.Round.Get() <= 0 {
-			go s.handle(task)
+		if task.Round.Get() < 0 {
+			if task.Round.Get() == -1 { //所有环数已扣减完成
+				go s.handle(task)
+			}
 			return true
 		}
 		return false

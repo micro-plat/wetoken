@@ -1,16 +1,27 @@
 package errs
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var _ IError = &Result{}
 
 type IResult interface {
 	GetResult() interface{}
-	GetCode() int
+	IError
 }
 type Result struct {
 	code   int
 	result interface{}
 }
 
+func (a *Result) Error() string {
+	return fmt.Sprintf("%v", a.result)
+}
+func (a *Result) GetError() error {
+	return errors.New(a.Error())
+}
 func (a *Result) GetCode() int {
 	return a.code
 }
@@ -26,4 +37,14 @@ func NewResultf(code int, f string, args ...interface{}) *Result {
 //NewResult 创建
 func NewResult(code int, content interface{}) *Result {
 	return &Result{code: code, result: content}
+}
+
+//NewResultByAny 创建
+func NewResultByAny(content interface{}) *Result {
+	switch content.(type) {
+	case IError, error, IResult:
+		return &Result{code: GetCode(content, 400), result: content}
+	default:
+		return &Result{code: GetCode(content, 200), result: content}
+	}
 }
