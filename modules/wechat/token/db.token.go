@@ -35,12 +35,14 @@ func (t *DBToken) Update(msg string) error {
 
 //Save 保存access token到db,不存在时创建
 func (t *DBToken) Save(tk *AccessToken) error {
+	//间歇时间120s
+	const GAPTIME = 120
 	db := hydra.C.DB().GetRegularDB()
 	//更新access token
 	r, err := db.Execute(sql.UpdateAccessToken, map[string]interface{}{
 		"appid":   t.appid,
 		"token":   tk.Token,
-		"expire":  tk.ExpiresIn,
+		"expire":  tk.ExpiresIn - GAPTIME,
 		"message": "success",
 	})
 	if err != nil {
@@ -53,7 +55,7 @@ func (t *DBToken) Save(tk *AccessToken) error {
 	_, err = db.Execute(sql.InsertAccessToken, map[string]interface{}{
 		"appid":   t.appid,
 		"token":   tk.Token,
-		"expire":  tk.ExpiresIn,
+		"expire":  tk.ExpiresIn - GAPTIME,
 		"message": "success",
 	})
 	if err != nil {
